@@ -1,0 +1,39 @@
+# filename: ciwa/config/settings.yaml
+
+# YAML Configuration for CIwA setup will go here.
+# Example structure:
+
+process:
+  name: "CIwA Demo Process"
+  version: "0.1.0"
+  description: "A demo process for CIwA"
+  owners:
+    - name: "Default Owner"
+      email: "evan@cip.org"
+  default_session_settings:
+    max_subs_per_topic: 10 # max submissions from each participant per topic
+    default_topic_settings:
+      voting_strategy: "SimpleMajority"
+      max_submissions: 10
+    participants:
+      - type: "LLMAgentParticipant"
+        model: "gpt-3"
+        prompt_template: "default_template"
+      - type: "LLMAgentParticipant"
+        model: "gpt-3"
+        prompt_template: "alternative_template"
+  sessions:
+    - name: "Demo Session"
+      description: "A demo session for CIwA"
+      next_session: "Demo Session" # re-run the same session
+      default_topic_settings:
+        voting_strategy: "SimpleMajority"
+        max_submissions: 10
+      topics:
+        - title: "A demo topic for CIwA"
+          description: "What should be submitted for this topic?"
+          voting_strategy: "SimpleMajority"
+        - title: "Another topic for CIwA"
+          description: "What should the next topic be?"
+          voting_strategy: "SimpleMajority" # could this be Plurality?
+          max_submissions: 20
