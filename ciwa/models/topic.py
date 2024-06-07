@@ -23,6 +23,7 @@ class Topic(Identifiable):
 
     def __init__(
         self,
+        session: "Session",
         title: str,
         description: str,
         voting_strategy: str,
@@ -33,12 +34,14 @@ class Topic(Identifiable):
         Initializes a new Topic with a title, description, and a specified voting strategy.
 
         Args:
+            session (Session): The session to which this topic belongs.
             title (str): The title of the topic.
             description (str): The description of the topic.
             voting_strategy (str): The name of the voting strategy to be used with this topic.
             **kwargs: Additional keyword arguments that might be used for future extensions.
         """
         super().__init__()
+        self.session: "Session" = session
         self.title: str = title
         self.description: str = description
         self.submissions = asyncio.Queue()
@@ -62,10 +65,37 @@ class Topic(Identifiable):
             f"Submission {submission.uuid} added to Topic {self.title} with UUID: {self.uuid}"
         )
 
+    @staticmethod
+    def get_object_schema() -> dict:
+        """
+        Returns the JSON schema to represent a Topic object's properties.
+        """
+        return {
+            "type": "object",
+            "properties": {
+                "uuid": {"type": "string"},
+                "title": {"type": "string"},
+                "description": {"type": "string"},
+                "voting_strategy": {"type": "string"},
+            },
+            "required": ["uuid", "title", "description", "voting_strategy"],
+        }
+
+    def get_object_json(self) -> dict:
+        """
+        Returns the JSON representation of the Topic object.
+        """
+        return {
+            "uuid": str(self.uuid),
+            "title": self.title,
+            "description": self.description,
+            "voting_strategy": self.voting_manager.strategy.__class__.__name__,
+        }
+
 
 class TopicFactory:
     @staticmethod
-    def create_topic(**kwargs) -> Topic:
+    def create_topic(session: "Session", **kwargs) -> Topic:
         """
         Create a Topic instance with flexible parameter input.
 
@@ -88,6 +118,7 @@ class TopicFactory:
 
         # Return a new Topic instance
         return Topic(
+            session=session,
             title=title,
             description=description,
             voting_strategy=voting_strategy,

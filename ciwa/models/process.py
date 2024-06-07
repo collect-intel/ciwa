@@ -8,7 +8,6 @@ from ciwa.config.config_manager import ConfigManager
 from ciwa.models.session import SessionFactory
 from ciwa.models.identifiable import Identifiable
 
-
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -29,25 +28,26 @@ class ProcessFactory:
         Description:
             This method fetches the default configuration for a process from the ConfigManager,
             applies any runtime overrides provided through kwargs, and then instantiates the
-            Process class with a list of sessions created by the SessionFactory. This ensures
-            that each Process is tailored to the specific requirements at runtime while adhering
-            to the predefined configurations.
+            Process class. The sessions are not created until the _init_sessions method is called
+            on the Process instance. This ensures that each Process is tailored to the specific
+            requirements at runtime while adhering to the predefined configurations.
         """
         # Load default configuration and update with any provided overrides
         config = ConfigManager.get_instance().get_config("process")
         config.update(kwargs)  # Override defaults with any provided kwargs
 
         # Handle nested configurations for sessions
-        default_session_settings = config.get("default_session_settings", {})
-        sessions = deque(
-            SessionFactory.create_session(**{**session, **default_session_settings})
-            for session in config.pop("sessions", [])
-        )
+        default_session_settings = config.pop("default_session_settings", {})
+        session_configs = config.pop("sessions", [])
 
         # Additional processing can be added here if necessary (e.g., validation)
 
         # Create the Process instance with all configurations
-        return Process(sessions=sessions, **config)
+        return Process(
+            session_configs=session_configs,
+            default_session_settings=default_session_settings,
+            **config,
+        )
 
 
 class Process(Identifiable):
@@ -55,19 +55,33 @@ class Process(Identifiable):
         self,
         name: str,
         description: str = None,
-        sessions: Deque["session"] = [],
+        session_configs: List[Dict[str, Any]] = [],
+        default_session_settings: Dict[str, Any] = {},
         **kwargs,
     ) -> None:
         super().__init__()
         self.name: str = name
         self.description: str = description
-        self.pending_sessions: Deque["Session"] = sessions
+        self.pending_sessions: Deque["Session"] = self._init_sessions(
+            session_configs, default_session_settings
+        )
         self.current_session: Optional["Session"] = None
         self.completed_sessions: List["Session"] = []
         self.owners: List["Owner"] = []
 
-    async def init_process(self) -> None:
+    def _init_sessions(
+        self,
+        session_configs: List[Dict[str, Any]],
+        default_session_settings: Dict[str, Any],
+    ) -> Deque["Session"]:
+        sessions = deque()
+        for session_config in session_configs:
+            session = SessionFactory.create_session(
+                process=self, **{**session_config, **default_session_settings}
+            )
+            sessions.append(session)
         logging.info("Process initialized with default configurations.")
+        return sessions
 
     def add_owner(self, owner: "Owner") -> None:
         self.owners.append(owner)
@@ -112,11 +126,38 @@ class Process(Identifiable):
     def conclude_process(self) -> None:
         logging.info("Concluding the process...")
 
+    @staticmethod
+    def get_object_schema() -> dict:
+        """
+        Returns the JSON schema to represent a Process object's properties.
+        """
+        return {
+            "type": "object",
+            "properties": {
+                "uuid": {"type": "string"},
+                "name": {"type": "string"},
+                "description": {"type": "string"},
+            },
+            "required": ["uuid", "name", "description"],
+        }
+
+    def get_object_json(self) -> dict:
+        """
+        Returns the JSON representation of the Process object.
+        """
+        return {
+            "uuid": str(self.uuid),
+            "name": self.name,
+            "description": self.description,
+            "sessions": [
+                session.get_object_json() for session in self.completed_sessions
+            ],
+        }
+
 
 async def main() -> None:
     config_manager = ConfigManager.get_instance("ciwa/config/settings.yaml")
     process = ProcessFactory.create_process()
-    await process.init_process()
 
     logging.info(f"Process {process.name} initialized with UUID: {process.uuid}")
     logging.info(f"Process sessions: {[s.uuid for s in process.pending_sessions]}")

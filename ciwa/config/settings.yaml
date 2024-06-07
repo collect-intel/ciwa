@@ -11,18 +11,20 @@ process:
     - name: "Default Owner"
       email: "evan@cip.org"
   default_session_settings:
-    max_subs_per_topic: 3 # max submissions from each participant per topic
+    max_subs_per_topic: 2 # max submissions from each participant per topic
     default_topic_settings:
       voting_strategy:
         type: "YesNoLabeling"
-      max_submissions: 10
+      max_submissions: 10 # max submissions total for the topic TODO: remove this once verified that we aren't using this
     participants:
-      - type: "LLMAgentParticipant"
-        model: "gpt-3"
+      - type: "ConversableAgentParticipant"
+        model: "gpt-3.5"
+        temperature: 0.9
         prompt_template: "default_template"
-      - type: "LLMAgentParticipant"
-        model: "gpt-3"
+      - type: "ConversableAgentParticipant"
+        model: "gpt-3.5"
         prompt_template: "alternative_template"
+        temperature: 0.9
   sessions:
     - name: "Demo Session"
       description: "A demo session for CIwA"
@@ -30,13 +32,13 @@ process:
       default_topic_settings:
         voting_strategy:
           type: "YesNoLabeling"
-        max_submissions: 3
+        max_submissions: 2
       topics:
-        - title: "A demo topic for CIwA"
-          description: "What should be submitted for this topic?"
-        - title: "Another topic for CIwA"
-          description: "What should the next topic be?"
+        - title: "What is a good topic to test this on?"
+          description: "Give a submission for what would be a good topic to test this on."
+        - title: "What are 3 topics that would be good to test this on?"
+          description: "Give a submission with 3 different topics, enumerated A. B. C. for what would be good to test this on."
           voting_strategy:
             type: "EnumLabeling" 
             enum_values: ["A", "B", "C"]
-          max_submissions: 5
+          max_submissions: 2

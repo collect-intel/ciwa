@@ -6,6 +6,7 @@ from ciwa.models.voting_strategies.voting_strategy import VotingStrategy
 from ciwa.models.voting_strategies.enum_labeling import EnumLabeling
 from ciwa.models.voting_strategies.yes_no_labeling import YesNoLabeling
 import logging
+import pdb
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -75,6 +76,7 @@ class VotingManager:
                 submission.get_id_str()
             ] = vote_json
         except jsonschema.ValidationError as e:
+            pdb.set_trace()
             logging.error(f"Invalid vote data: {e.message}")
 
     async def collect_comparative_votes(

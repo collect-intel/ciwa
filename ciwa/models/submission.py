@@ -25,3 +25,48 @@ class Submission(Identifiable):
 
     def __str__(self) -> str:
         return f"Submission {self.uuid} by {self.participant.identifier} on '{self.topic.title}' at {self.created_at}: {self.content[:50]}..."
+
+    @staticmethod
+    def get_object_schema() -> dict:
+        """
+        Returns the JSON schema to represent a Submission object's properties.
+        """
+        return {
+            "type": "object",
+            "properties": {
+                "uuid": {"type": "string"},
+                "participant_uuid": {"type": "string"},
+                "content": {"type": "string"},
+                "created_at": {"type": "string"},
+            },
+            "required": [
+                "uuid",
+                "participant_uuid",
+                "content",
+                "created_at",
+            ],
+        }
+
+    def get_object_json(self) -> dict:
+        """
+        Returns a JSON representation of the Submission object.
+        """
+        return {
+            "uuid": self.uuid,
+            "participant_uuid": self.participant.uuid,
+            "content": self.content,
+            "created_at": self.created_at.isoformat(),
+        }
+
+    @staticmethod
+    def get_response_schema() -> dict:
+        """
+        Returns the JSON schema to represent the properties a Participant is expected to respond with to create a Submission.
+        """
+        return {
+            "type": "object",
+            "properties": {
+                "content": {"type": "string"},
+            },
+            "required": ["content"],
+        }

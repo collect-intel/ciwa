@@ -1,3 +1,4 @@
 
 *.pyc
 *.DS_Store
+ciwa/config/OAI_CONFIG_LIST.json

@@ -82,6 +82,24 @@ class Participant(Identifiable, ABC):
         """
         pass
 
+    @staticmethod
+    @abstractmethod
+    def get_object_schema() -> dict:
+        """
+        Returns the JSON schema to represent a Participant object's properties.
+        """
+        pass
+
+    @abstractmethod
+    def get_object_json(self) -> dict:
+        """
+        Returns a JSON representation of the Participant object.
+
+        Returns:
+            dict: A dictionary representing the participant object.
+        """
+        return {"uuid": self.uuid}
+
     def __str__(self) -> str:
         """
         Provides a string representation of the participant.

@@ -1,7 +1,9 @@
 import random
 import uuid
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Union
 import string
+import jsonschema
+import json
 
 
 def generate_random_text(length: int = 10) -> str:
@@ -29,3 +31,36 @@ def generate_fake_json(schema: Dict[str, Any]) -> Dict[str, Any]:
         prop: generate_value(prop_schema)
         for prop, prop_schema in schema["properties"].items()
     }
+
+
+# Function to validate JSON against a schema
+def is_valid_json_for_schema(json_data: Dict[str, Any], schema: Dict[str, Any]) -> None:
+    try:
+        jsonschema.validate(instance=json_data, schema=schema)
+        return True
+    except jsonschema.exceptions.ValidationError as err:
+        return False
+
+
+def get_json(input_data: Union[str, Dict[str, Any]]) -> Union[Dict[str, Any], None]:
+    """
+    Convert input data to JSON if it's a valid JSON string or return it if it's a dictionary.
+
+    Args:
+        input_data (Union[str, Dict[str, Any]]): The input data to check and convert.
+
+    Returns:
+        Union[Dict[str, Any], None]: The valid JSON data as a dictionary or None if invalid.
+    """
+    if isinstance(input_data, str):
+        try:
+            data = json.loads(input_data)
+            return data
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e.msg}")
+            return None
+    elif isinstance(input_data, dict):
+        return input_data
+    else:
+        print("Invalid input type. Must be a JSON string or a dictionary.")
+        return None

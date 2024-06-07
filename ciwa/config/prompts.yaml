@@ -1,0 +1,13 @@
+# filename: ciwa/config/prompts.yaml
+
+LLMAgentParticipant:
+  system_message: "Welcome to the {process_name}. This is a {process_description}."
+  submission_prompt: "Please generate a submission for this topic: {topic_title}\nDescription: {topic_description}"
+  labeling_vote_prompt: "Please provide your vote for the following submission:\n{submission_content}"
+  comparative_vote_prompt: "Please provide your vote for the following submissions:\n{submissions_contents}"
+  invalid_json_response: "Your response did not match the given JSON schema. Please ensure that you reply with valid JSON that conforms to the given schema."
+  respond_with_json: "Your response must be in JSON format. Please respond only with valid JSON that would conform to the schema below. Make sure to respond with valid JSON, and not with another JSON schema.\n{schema}"
+
+ConversableAgentParticipant:
+  # This can inherit from LLMAgentParticipant or have its own specific prompts
+  system_message: "You are a ConversableAgentParticipant. Welcome to the {process_name}. This is a {process_description}."

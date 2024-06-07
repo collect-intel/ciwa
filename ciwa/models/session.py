@@ -22,22 +22,52 @@ class Session(Identifiable):
 
     def __init__(
         self,
-        topics: List[Topic] = [],
+        process: "Process",
+        topics_config: List[Dict[str, Any]] = [],
+        default_topic_settings: Dict[str, Any] = {},
+        participants_config: List[Dict[str, Any]] = [],
         max_subs_per_topic: int = 1,
         max_concurrent: int = 20,
         **kwargs,
     ) -> None:
         super().__init__()
+        self.process: "Process" = process
         self.name: str = kwargs.get("name", "Session")
         self.description: str = kwargs.get("description", "A Session.")
         self.is_complete: bool = False
-        self.topics: List[Topic] = topics
-        self.participants: List[Participant] = []
+        self.topics: List[Topic] = self._init_topics(
+            topics_config, default_topic_settings
+        )
+        self.participants: List[Participant] = self._init_participants(
+            participants_config
+        )
         self.max_concurrent: int = max_concurrent
         self.max_subs_per_topic: int = max_subs_per_topic
-        self.results: Dict[str, Dict[str, Any]] = {}
+        self.results: Dict[str, Any] = {}
         logging.info(f"Session initialized with UUID: {self.uuid}")
         logging.info(f"Session topics: {[topic.title for topic in self.topics]}")
+
+    def _init_topics(
+        self,
+        topics_config: List[Dict[str, Any]],
+        default_topic_settings: Dict[str, Any],
+    ) -> List[Topic]:
+        topics = [
+            TopicFactory.create_topic(
+                session=self, **{**default_topic_settings, **topic_config}
+            )
+            for topic_config in topics_config
+        ]
+        return topics
+
+    def _init_participants(
+        self, participants_config: List[Dict[str, Any]]
+    ) -> List[Participant]:
+        participants = [
+            ParticipantFactory.create_participant(**participant_config)
+            for participant_config in participants_config
+        ]
+        return participants
 
     def add_participant(self, participant: Participant) -> None:
         """
@@ -92,11 +122,12 @@ class Session(Identifiable):
             async for submission in participant.generate_submissions(
                 topic, self.max_subs_per_topic
             ):
-                await topic.add_submission(submission)
-                if topic.voting_manager.is_labeling:
-                    await topic.voting_manager.collect_labeling_votes(
-                        submission, self.participants
-                    )
+                if submission is not None:
+                    await topic.add_submission(submission)
+                    if topic.voting_manager.is_labeling:
+                        await topic.voting_manager.collect_labeling_votes(
+                            submission, self.participants
+                        )
 
     async def collect_all_votes(self) -> None:
         logging.info("Collecting any comparative votes on topics.")
@@ -111,8 +142,29 @@ class Session(Identifiable):
 
     async def gather_results(self) -> None:
         logging.info("Gathering results from all topics.")
+        self.results = {
+            "session": {
+                "uuid": self.uuid,
+                "name": self.name,
+                "description": self.description,
+            },
+            "topics": [],
+            "participants": [
+                participant.get_object_json() for participant in self.participants
+            ],
+        }
         for topic in self.topics:
-            self.results[topic.get_id_str()] = topic.voting_manager.process_votes()
+            topic_data = topic.get_object_json()
+            topic_data["submissions"] = []
+            processed_votes = topic.voting_manager.process_votes()
+            while not topic.submissions.empty():
+                submission = await topic.submissions.get()
+                submission_data = submission.get_object_json()
+                submission_data["votes"] = processed_votes.get(
+                    submission.get_id_str(), {}
+                )
+                topic_data["submissions"].append(submission_data)
+            self.results["topics"].append(topic_data)
 
     def save_results(self) -> None:
         results_file = f"{self.get_id_str()}_results.json"
@@ -120,15 +172,45 @@ class Session(Identifiable):
             json.dump(self.results, f, indent=4)
         logging.info(f"Results saved to {results_file}")
 
+    @staticmethod
+    def get_object_schema() -> dict:
+        """
+        Returns the JSON schema to represent a Session object's properties.
+        """
+        return {
+            "type": "object",
+            "properties": {
+                "uuid": {"type": "string"},
+                "name": {"type": "string"},
+                "description": {"type": "string"},
+            },
+            "required": ["uuid", "name", "description"],
+        }
+
+    def get_object_json(self) -> dict:
+        """
+        Returns the JSON representation of the Session object.
+        """
+        return {
+            "uuid": str(self.uuid),
+            "name": self.name,
+            "description": self.description,
+            "topics": [topic.get_object_json() for topic in self.topics],
+            "participants": [
+                participant.get_object_json() for participant in self.participants
+            ],
+        }
+
 
 class SessionFactory:
     @staticmethod
-    def create_session(**kwargs) -> Session:
+    def create_session(process: "Process", **kwargs) -> Session:
         """
         Create a Session instance with flexible parameter input.
 
         Args:
             **kwargs: Arbitrary keyword arguments. Expected keys:
+                - process (Process): The process to which the session belongs.
                 - name (str): Name of the session.
                 - description (str): Detailed description of the session.
                 - topics_config (list): List of configurations for topics within this session.
@@ -144,21 +226,14 @@ class SessionFactory:
         default_topic_settings = kwargs.pop("default_topic_settings", {})
         participant_configs = kwargs.pop("participants", [])
 
-        # Create topics using the TopicFactory, applying default settings
-        topics = [
-            TopicFactory.create_topic(**{**default_topic_settings, **topic_config})
-            for topic_config in topics_config
-        ]
-
-        # Create participants
-        participants = [
-            ParticipantFactory.create_participant(**participant_config)
-            for participant_config in participant_configs
-        ]
-
-        session = Session(name=name, description=description, topics=topics, **kwargs)
-
-        for participant in participants:
-            session.add_participant(participant)
+        session = Session(
+            process=process,
+            name=name,
+            description=description,
+            topics_config=topics_config,
+            default_topic_settings=default_topic_settings,
+            participants_config=participant_configs,
+            **kwargs,
+        )
 
         return session
