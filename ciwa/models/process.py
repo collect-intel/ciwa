@@ -4,9 +4,9 @@ import asyncio
 import logging
 from collections import deque
 from typing import List, Optional, Dict, Any, Deque
-from uuid import UUID, uuid4
 from ciwa.config.config_manager import ConfigManager
 from ciwa.models.session import SessionFactory
+from ciwa.models.identifiable import Identifiable
 
 
 logging.basicConfig(
@@ -50,7 +50,7 @@ class ProcessFactory:
         return Process(sessions=sessions, **config)
 
 
-class Process:
+class Process(Identifiable):
     def __init__(
         self,
         name: str,
@@ -58,7 +58,7 @@ class Process:
         sessions: Deque["session"] = [],
         **kwargs,
     ) -> None:
-        self.uuid: UUID = uuid4()
+        super().__init__()
         self.name: str = name
         self.description: str = description
         self.pending_sessions: Deque["Session"] = sessions

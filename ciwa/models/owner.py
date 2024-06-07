@@ -2,12 +2,12 @@
 
 import logging
 from typing import List, Optional, Dict
-from uuid import UUID, uuid4
+from ciwa.models.identifiable import Identifiable
 
 
-class Owner:
+class Owner(Identifiable):
     def __init__(self, name: str, email: str) -> None:
-        self.uuid: UUID = uuid4()
+        super().__init__()
         self.name: str = name
         self.email: str = email
         self.processes: List["Process"] = []

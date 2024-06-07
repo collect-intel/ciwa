@@ -3,19 +3,17 @@
 from ciwa.models.participants.participant import Participant
 from ciwa.models.topic import Topic
 from ciwa.models.submission import Submission
-from ciwa.models.votes.comparative_vote import (
-    RankedVote,
-)  # TODO: Architect such that we don't need to import this
-from ciwa.models.votes.independent_vote import (
-    BinaryVote,
-)  # TODO: Architect such that we don't need to import this
-from typing import List, AsyncGenerator
+from typing import List, Dict, Any, AsyncGenerator
 import asyncio
 import logging
+from ciwa.tests.utils import json_utils
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
+
+# for testing only:
+SLEEP_DELAY = 0
 
 
 class LLMAgentParticipant(Participant):
@@ -66,23 +64,33 @@ class LLMAgentParticipant(Participant):
         Returns:
             Submission: The generated submission.
         """
-        await asyncio.sleep(1)  # Simulate processing time
+        await asyncio.sleep(SLEEP_DELAY)  # Simulate processing time
         content = f"Generated content by {self.uuid} for topic '{topic.title}'"
         return Submission(topic, self, content)
 
-    # TODO Possibly refactor or delete this method
-    # TODO figure out how to architect to not return a BinaryVote every time
-    async def generate_independent_vote(self, submission: Submission) -> BinaryVote:
-        vote_value = True  # Implement the logic for determining the vote value
-        return BinaryVote(participant=self, vote_value=vote_value)
+    async def get_labeling_vote_response(
+        self, submission: Submission, vote_schema: dict
+    ) -> dict:
+        vote_json = json_utils.generate_fake_json(
+            vote_schema
+        )  # TODO Implement the logic for getting a response from the LLM
+        await asyncio.sleep(SLEEP_DELAY)  # Simulate processing time
+        logging.info(
+            f"LLMAgentParticipant {self.uuid} voted with label on submission {submission.uuid}"
+        )
+        return vote_json
 
-    # TODO Possibly refactor or delete this method
-    # TODO figure out how to architect to not return a RankedVote every time
-    async def generate_comparative_vote(
-        self, submissions: List[Submission]
-    ) -> RankedVote:
-        rankings = []  # Implement the logic for determining the rankings
-        return RankedVote(participant=self, rankings=rankings)
+    async def get_comparative_vote_response(
+        self, submissions: List[Submission], vote_schema: dict
+    ) -> dict:
+        vote_json = json_utils.generate_fake_json(
+            vote_schema
+        )  # TODO Implement the logic for getting a response from the LLM
+        await asyncio.sleep(SLEEP_DELAY)  # Simulate processing time
+        logging.info(
+            f"LLMAgentParticipant {self.uuid} voted comparatively on submissions {[submission.uuid for submission in submissions]}"
+        )
+        return vote_json
 
     def __str__(self) -> str:
         """

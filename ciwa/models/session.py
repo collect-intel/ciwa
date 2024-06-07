@@ -2,19 +2,20 @@
 
 import logging
 import asyncio
-from uuid import UUID, uuid4
-from typing import List, Optional, Tuple
+import json
+from typing import List, Optional, Dict, Any
 from ciwa.models.topic import Topic, TopicFactory
 from ciwa.models.participants.participant import Participant
 from ciwa.models.participants.participant_factory import ParticipantFactory
 from ciwa.models.submission import Submission
+from ciwa.models.identifiable import Identifiable
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
-class Session:
+class Session(Identifiable):
     """
     Represents a session within the CIwA system.
     """
@@ -23,10 +24,10 @@ class Session:
         self,
         topics: List[Topic] = [],
         max_subs_per_topic: int = 1,
-        max_concurrent: int = 10,
+        max_concurrent: int = 20,
         **kwargs,
     ) -> None:
-        self.uuid: UUID = uuid4()
+        super().__init__()
         self.name: str = kwargs.get("name", "Session")
         self.description: str = kwargs.get("description", "A Session.")
         self.is_complete: bool = False
@@ -34,6 +35,7 @@ class Session:
         self.participants: List[Participant] = []
         self.max_concurrent: int = max_concurrent
         self.max_subs_per_topic: int = max_subs_per_topic
+        self.results: Dict[str, Dict[str, Any]] = {}
         logging.info(f"Session initialized with UUID: {self.uuid}")
         logging.info(f"Session topics: {[topic.title for topic in self.topics]}")
 
@@ -62,15 +64,17 @@ class Session:
         """
         logging.info(f"Running session {self.uuid}.")
         await self.gather_submissions()
+        await self.collect_all_votes()
+        await self.gather_results()
         self.conclude()
 
     def conclude(self) -> None:
         """
         Conclude the session.
         """
-        # Placeholder logic for session conclusion
         self.is_complete = True
         logging.info(f"Session {self.uuid} completed.")
+        self.save_results()
 
     async def handle_submissions(self, topic: Topic, participant: Participant) -> None:
         """
@@ -89,6 +93,32 @@ class Session:
                 topic, self.max_subs_per_topic
             ):
                 await topic.add_submission(submission)
+                if topic.voting_manager.is_labeling:
+                    await topic.voting_manager.collect_labeling_votes(
+                        submission, self.participants
+                    )
+
+    async def collect_all_votes(self) -> None:
+        logging.info("Collecting any comparative votes on topics.")
+        tasks = []
+        for topic in self.topics:
+            if not topic.voting_manager.is_labeling:
+                task = asyncio.create_task(
+                    topic.voting_manager.collect_comparative_votes(self.participants)
+                )
+                tasks.append(task)
+        await asyncio.gather(*tasks)
+
+    async def gather_results(self) -> None:
+        logging.info("Gathering results from all topics.")
+        for topic in self.topics:
+            self.results[topic.get_id_str()] = topic.voting_manager.process_votes()
+
+    def save_results(self) -> None:
+        results_file = f"{self.get_id_str()}_results.json"
+        with open(results_file, "w") as f:
+            json.dump(self.results, f, indent=4)
+        logging.info(f"Results saved to {results_file}")
 
 
 class SessionFactory:

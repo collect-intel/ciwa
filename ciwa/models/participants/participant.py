@@ -3,10 +3,10 @@
 from abc import ABC, abstractmethod
 import asyncio
 from typing import List, AsyncGenerator
-from uuid import uuid4
+from ciwa.models.identifiable import Identifiable
 
 
-class Participant(ABC):
+class Participant(Identifiable, ABC):
     """
     Abstract base class representing a participant in the system.
 
@@ -20,7 +20,7 @@ class Participant(ABC):
         Initializes a new Participant instance with a unique identifier.
 
         """
-        self.uuid = uuid4()
+        super().__init__()
 
     @abstractmethod
     async def generate_submissions(
@@ -58,24 +58,22 @@ class Participant(ABC):
         """
         pass
 
-    # TODO: Possibly refactor or delete this method
     @abstractmethod
-    async def generate_independent_vote(
-        self, submission: "Submission"
-    ) -> "IndependentVote":
+    async def get_labeling_vote_response(
+        self, submission: "Submission", vote_schema: dict
+    ) -> dict:
         """
-        Generates an independent vote for a given submission.
+        Generates an labeling vote for a given submission.
 
         Args:
             submission (Submission): The submission for which the vote is cast.
         """
         pass
 
-    # TODO: Possibly refactor or delete this method
     @abstractmethod
-    async def generate_comparative_vote(
-        self, submissions: List["Submission"]
-    ) -> "ComparativeVote":
+    async def get_comparative_vote_response(
+        self, submissions: List["Submission"], vote_schema: dict
+    ) -> dict:
         """
         Generates a comparative vote for a list of submissions.
 

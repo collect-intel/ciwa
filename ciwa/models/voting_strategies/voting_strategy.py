@@ -1,24 +1,21 @@
 # filename: ciwa/strategies/voting_strategies/voting_strategy.py
 
 from abc import ABC, abstractmethod
-from typing import List, TypeVar, Generic, Any
-
-VoteType = TypeVar("VoteType", bound="Vote")
+from typing import List, TypeVar, Any, Dict
 
 
-class VotingStrategy(ABC, Generic[VoteType]):
+class VotingStrategy(ABC):
     """
     Abstract base class for voting strategies.
     """
 
     @abstractmethod
-    def process_votes(self, votes: List[VoteType]) -> Any:
+    def process_votes(self, participant_votes_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Processes a list of votes and determines the result based on the specific strategy.
+        Processes a list of participant vote responses to get an aggregated result.
 
         Args:
-            votes (List[VoteType]): The list of votes to process. Each item is an instance of a subclass of Vote.
-
+            participant_votes_data (Dict[str, Any]): A dictionary of participant vote responses.
         Returns:
             Any: The result of the vote processing, specific to the strategy.
         """
@@ -36,25 +33,37 @@ class VotingStrategy(ABC, Generic[VoteType]):
         pass
 
     @abstractmethod
-    def is_independent(self) -> bool:
+    def get_vote_schema(self) -> Dict[str, Any]:
+        """
+        Returns the JSON schema for the vote data.
+        """
         pass
 
+    @staticmethod
+    @abstractmethod
+    def is_labeling(self) -> bool:
+        pass
 
-class IndependentVotingStrategy(VotingStrategy[VoteType], ABC):
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__} Voting Strategy"
+
+
+class LabelingStrategy(VotingStrategy, ABC):
     """
-    Abstract VotingStrategy class implementing an independent voting rule,
-    where votes are given on Submissions independently without comparison to other Submissions.
+    Abstract VotingStrategy class implementing an labeling voting rule,
+    where votes are given on Submissions independently without comparison to other Submissions,
+    effectively applying a label to each Submission.
     """
 
-    def is_independent(self) -> bool:
+    def is_labeling(self) -> bool:
         return True
 
 
-class ComparativeVotingStrategy(VotingStrategy[VoteType], ABC):
+class ComparativeVotingStrategy(VotingStrategy, ABC):
     """
     Abstract VotingStrategy class implementing a comparative voting rule,
     where votes are given on a set of Submissions by comparing them to each other.
     """
 
-    def is_independent(self) -> bool:
+    def is_labeling(self) -> bool:
         return False

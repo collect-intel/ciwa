@@ -1,20 +1,20 @@
 # filename: ciwa/models/topic.py
-from uuid import uuid4, UUID
+
 from ciwa.models.voting_manager import VotingManagerFactory
 import logging
 import asyncio
+from ciwa.models.identifiable import Identifiable
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
-class Topic:
+class Topic(Identifiable):
     """
     Represents a topic in a discussion or debate platform, capable of handling submissions and applying a voting strategy.
 
     Attributes:
-        uuid (UUID): A unique identifier for the topic.
         title (str): The title of the topic.
         description (str): A detailed description of what the topic is about.
         voting_manager (VotingManager): The voting manager that handles vote processing for this topic.
@@ -22,7 +22,12 @@ class Topic:
     """
 
     def __init__(
-        self, title: str, description: str, voting_strategy: str, **kwargs
+        self,
+        title: str,
+        description: str,
+        voting_strategy: str,
+        voting_strategy_config: dict = {},
+        **kwargs,
     ) -> None:
         """
         Initializes a new Topic with a title, description, and a specified voting strategy.
@@ -33,13 +38,15 @@ class Topic:
             voting_strategy (str): The name of the voting strategy to be used with this topic.
             **kwargs: Additional keyword arguments that might be used for future extensions.
         """
-        self.uuid: UUID = uuid4()
+        super().__init__()
         self.title: str = title
         self.description: str = description
         self.submissions = asyncio.Queue()
         self.voting_manager = VotingManagerFactory.create_voting_manager(
             strategy=voting_strategy,
             submissions=self.submissions,
+            topic=self,
+            **voting_strategy_config,
         )
         logging.info(f"Topic initialized with UUID: {self.uuid}")
 
@@ -66,7 +73,7 @@ class TopicFactory:
             **kwargs: Arbitrary keyword arguments. Expected keys:
                 - title (str): Title of the topic.
                 - description (str): Detailed description of the topic.
-                - voting_strategy (str, optional): Strategy for voting, defaults to 'SimpleMajority'.
+                - voting_strategy (str, optional): Strategy for voting, defaults to 'YesNoLabeling'.
                 - max_submissions (int, optional): Maximum submissions allowed, defaults to 10.
 
         Returns:
@@ -75,7 +82,8 @@ class TopicFactory:
         # Extract values from kwargs or use defaults
         title = kwargs.get("title", "Default Topic Title")
         description = kwargs.get("description", "No description provided.")
-        voting_strategy = kwargs.get("voting_strategy", "SimpleMajority")
+        voting_strategy_config = kwargs.pop("voting_strategy", {})
+        voting_strategy = voting_strategy_config.pop("type", "YesNoLabeling")
         max_submissions = kwargs.get("max_submissions", 10)
 
         # Return a new Topic instance
@@ -84,4 +92,5 @@ class TopicFactory:
             description=description,
             voting_strategy=voting_strategy,
             max_submissions=max_submissions,
+            voting_strategy_config=voting_strategy_config,
         )

@@ -11,9 +11,10 @@ process:
     - name: "Default Owner"
       email: "evan@cip.org"
   default_session_settings:
-    max_subs_per_topic: 10 # max submissions from each participant per topic
+    max_subs_per_topic: 3 # max submissions from each participant per topic
     default_topic_settings:
-      voting_strategy: "SimpleMajority"
+      voting_strategy:
+        type: "YesNoLabeling"
       max_submissions: 10
     participants:
       - type: "LLMAgentParticipant"
@@ -27,13 +28,15 @@ process:
       description: "A demo session for CIwA"
       next_session: "Demo Session" # re-run the same session
       default_topic_settings:
-        voting_strategy: "SimpleMajority"
-        max_submissions: 10
+        voting_strategy:
+          type: "YesNoLabeling"
+        max_submissions: 3
       topics:
         - title: "A demo topic for CIwA"
           description: "What should be submitted for this topic?"
-          voting_strategy: "SimpleMajority"
         - title: "Another topic for CIwA"
           description: "What should the next topic be?"
-          voting_strategy: "SimpleMajority" # could this be Plurality?
-          max_submissions: 20
+          voting_strategy:
+            type: "EnumLabeling" 
+            enum_values: ["A", "B", "C"]
+          max_submissions: 5
