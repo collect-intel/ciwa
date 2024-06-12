@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Union
+import datetime
 
 
 class VotingResults(ABC):
@@ -75,9 +76,11 @@ class LabelVotingResults(VotingResults):
             participant_id (str): The ID of the participant who voted.
             vote_data (Dict[str, Any]): The raw vote data from the participant.
         """
+        created_at = datetime.datetime.now()
         if participant_id not in self.participants:
             self.participants.append(participant_id)
         for submission_id, vote in vote_data.items():
+            vote["created_at"] = created_at
             if submission_id not in self.submissions:
                 self.submissions[submission_id] = []
             self.submissions[submission_id].append(
@@ -108,8 +111,22 @@ class LabelVotingResults(VotingResults):
         """
         return {
             "submissions": [
-                {"uuid": submission_id, "voting_participants": participants}
-                for submission_id, participants in self.submissions.items()
+                {
+                    "uuid": submission_id,
+                    "voting_participants": [
+                        {
+                            "uuid": participant["uuid"],
+                            "vote": {
+                                "created_at": participant["vote"][
+                                    "created_at"
+                                ].isoformat(),
+                                "vote": participant["vote"]["vote"],
+                            },
+                        }
+                        for participant in voting_participants
+                    ],
+                }
+                for submission_id, voting_participants in self.submissions.items()
             ],
             "aggregated_results": {
                 "submissions": [
@@ -139,6 +156,7 @@ class ComparativeVotingResults(VotingResults):
             participant_id (str): The ID of the participant who voted.
             vote_data (Any): The raw vote data from the participant.
         """
+        vote_data["created_at"] = datetime.datetime.now()
         if participant_id not in self.participants:
             self.participants.append(participant_id)
         self.votes_data[participant_id] = vote_data
@@ -163,8 +181,14 @@ class ComparativeVotingResults(VotingResults):
             Dict[str, Any]: JSON-compatible representation of the comparative voting results.
         """
         return {
-            "participants": [
-                {"uuid": participant_id, "vote": vote_data}
+            "voting_participants": [
+                {
+                    "uuid": participant_id,
+                    "vote": {
+                        "created_at": vote_data["created_at"].isoformat(),
+                        "vote": vote_data["vote"],
+                    },
+                }
                 for participant_id, vote_data in self.votes_data.items()
             ],
             "aggregated_results": {

@@ -49,12 +49,13 @@ class Process(Identifiable):
         super().__init__()
         self.name: str = name
         self.description: Optional[str] = description
-        self.pending_sessions: Deque["Session"] = self._init_sessions(
-            session_configs, default_session_settings
-        )
         self.current_session: Optional["Session"] = None
         self.completed_sessions: List["Session"] = []
         self.owners: List["Owner"] = []
+        self.default_session_settings: Dict[str, Any] = default_session_settings
+        self.pending_sessions: Deque["Session"] = self._init_sessions(
+            session_configs, default_session_settings
+        )
 
     def _init_sessions(
         self,
@@ -63,7 +64,7 @@ class Process(Identifiable):
     ) -> Deque["Session"]:
         sessions = deque(
             SessionFactory.create_session(
-                process=self, **{**session_config, **default_session_settings}
+                process=self, **{**default_session_settings, **session_config}
             )
             for session_config in session_configs
         )

@@ -225,7 +225,16 @@ class SessionFactory:
         name = kwargs.pop("name", "Default Session Name")
         description = kwargs.pop("description", "No description provided.")
         topics_config = kwargs.pop("topics", [])
-        default_topic_settings = kwargs.pop("default_topic_settings", {})
+        session_default_topic_settings = kwargs.pop("default_topic_settings", {})
+        process_default_topic_settings = process.default_session_settings.get(
+            "default_topic_settings", {}
+        )
+        # Merge process default topic settings with session default topic settings
+        default_topic_settings = {
+            **process_default_topic_settings,
+            **session_default_topic_settings,
+        }
+
         participant_configs = kwargs.pop("participants", [])
 
         session = Session(

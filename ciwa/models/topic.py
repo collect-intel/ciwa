@@ -35,7 +35,8 @@ class Topic(Identifiable):
         self.session: "Session" = session
         self.title: str = title
         self.description: str = description
-        self.submissions: "Queue" = asyncio.Queue()
+        self.submissions: List["Submission"] = []
+        self.submissions_queue: "Queue" = asyncio.Queue()
         self.voting_manager = VotingManagerFactory.create_voting_manager(
             strategy=voting_strategy,
             topic=self,
@@ -50,7 +51,8 @@ class Topic(Identifiable):
         Args:
             submission (Submission): The submission to add to the topic.
         """
-        await self.submissions.put(submission)
+        await self.submissions_queue.put(submission)
+        self.submissions.append(submission)
         self.voting_manager.add_submission(submission)
         logging.info(
             f"Submission {submission.uuid} added to Topic {self.title} with UUID: {self.uuid}"
@@ -81,6 +83,7 @@ class Topic(Identifiable):
             "title": self.title,
             "description": self.description,
             "voting_strategy": self.voting_manager.strategy.__class__.__name__,
+            "submissions": [submission.to_json() for submission in self.submissions],
         }
 
 
