@@ -1,8 +1,7 @@
-# filename: ciwa/models/participants/participant.py
+# models/participants/participant.py
 
 from abc import ABC, abstractmethod
-import asyncio
-from typing import List, AsyncGenerator
+from typing import List, AsyncGenerator, Dict, Any
 from ciwa.models.identifiable import Identifiable
 
 
@@ -18,7 +17,6 @@ class Participant(Identifiable, ABC):
     def __init__(self) -> None:
         """
         Initializes a new Participant instance with a unique identifier.
-
         """
         super().__init__()
 
@@ -60,25 +58,38 @@ class Participant(Identifiable, ABC):
 
     @abstractmethod
     async def get_labeling_vote_response(
-        self, submission: "Submission", vote_schema: dict
-    ) -> dict:
+        self, submission: "Submission", vote_schema: Dict[str, Any], vote_prompt: str
+    ) -> Dict:
         """
-        Generates an labeling vote for a given submission.
+        Generates a labeling vote for a given submission.
 
         Args:
             submission (Submission): The submission for which the vote is cast.
+            vote_schema (dict): The schema for the vote.
+            vote_prompt (str): The prompt for the vote.
+
+        Returns:
+            dict: The vote response.
         """
         pass
 
     @abstractmethod
     async def get_comparative_vote_response(
-        self, submissions: List["Submission"], vote_schema: dict
-    ) -> dict:
+        self,
+        submissions: List["Submission"],
+        vote_schema: Dict[str, Any],
+        vote_prompt: str,
+    ) -> Dict:
         """
         Generates a comparative vote for a list of submissions.
 
         Args:
             submissions (List[Submission]): The list of submissions to compare.
+            vote_schema (dict): The schema for the vote.
+            vote_prompt (str): The prompt for the vote.
+
+        Returns:
+            dict: The vote response.
         """
         pass
 
@@ -87,11 +98,14 @@ class Participant(Identifiable, ABC):
     def get_object_schema() -> dict:
         """
         Returns the JSON schema to represent a Participant object's properties.
+
+        Returns:
+            dict: The JSON schema.
         """
         pass
 
     @abstractmethod
-    def get_object_json(self) -> dict:
+    def to_json(self) -> dict:
         """
         Returns a JSON representation of the Participant object.
 

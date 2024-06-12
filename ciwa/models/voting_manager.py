@@ -1,131 +1,176 @@
-# filename: ciwa/models/voting_manager.py
-from typing import List, Type, Dict, Any
 import asyncio
+import logging
+from typing import List, Type, Dict, Any
 import jsonschema
 from ciwa.models.voting_strategies.voting_strategy import VotingStrategy
 from ciwa.models.voting_strategies.enum_labeling import EnumLabeling
 from ciwa.models.voting_strategies.yes_no_labeling import YesNoLabeling
-import logging
-import pdb
+from ciwa.models.voting_strategies.ranking_comparison import RankingComparison
+from ciwa.models.submission import Submission
+from ciwa.models.voting_results import LabelVotingResults, ComparativeVotingResults
+import time
+from abc import ABC, abstractmethod
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
 
-
-class VotingManager:
+class VotingManager(ABC):
     """
-    Manages the voting process for a given topic, using a specified voting strategy.
+    Abstract base class for managing the voting process for a given topic using a specified voting strategy.
 
     Attributes:
         strategy (VotingStrategy): The voting strategy to use for this topic.
-        submissions (asyncio.Queue[Submission]): An asyncio.Queue() of Submissions to be voted on.
-        vote_type (str): The type of vote used by the strategy.
-        is_labeling (bool): Whether the strategy is labeling submissions independently of other submissions.
-        participant_votes_data (Dict[str, Dict]): A dictionary of participant vote data.
+        submissions_needing_votes (asyncio.Queue[Submission]): Queue of submissions needing votes.
+        results (VotingResults): Instance to hold and manage voting results.
         schema (Dict[str, Any]): The JSON schema for the vote data.
+        submission_ids (List[str]): List of submission.uuid's that were made available for voting.
     """
 
     def __init__(
         self,
         strategy_class: Type[VotingStrategy],
-        submissions: asyncio.Queue["Submission"],
         topic: "Topic",
         **kwargs,
     ) -> None:
-        self.topic: "Topic" = topic
+        self.topic = topic
         self.strategy: VotingStrategy = strategy_class(**kwargs)
-        self.submissions: asyncio.Queue["Submission"] = submissions
-        self.vote_type: str = strategy_class.get_vote_type()
-        self.is_labeling: bool = self.strategy.is_labeling()
-        self.participant_votes_data: Dict[str, Dict] = {}
-        self.schema: Dict[str, Any] = self.strategy.get_vote_schema()
+        self.submissions_needing_votes: asyncio.Queue[Submission] = asyncio.Queue()
+        self.submission_ids: List[str] = []
+        self.results: "VotingResults" = self.initialize_results()
         logging.info(
             f"VotingManager initialized with strategy: {self.strategy.__class__.__name__}"
         )
 
-    async def collect_labeling_votes(
-        self, submission: "Submission", participants: List["Participant"]
+    @abstractmethod
+    def initialize_results(self) -> "VotingResults":
+        """
+        Initialize the appropriate VotingResults instance.
+        """
+        pass
+
+    def add_submission(self, submission: Submission) -> None:
+        self.submissions_needing_votes.put_nowait(submission)
+        self.submission_ids.append(submission.uuid)
+
+    @abstractmethod
+    async def collect_votes(self, participants: List["Participant"]) -> None:
+        pass
+
+    @abstractmethod
+    def get_results(self) -> Dict[str, Any]:
+        pass
+
+
+class LabelingVotingManager(VotingManager):
+
+    def __init__(
+        self,
+        strategy_class: Type[VotingStrategy],
+        topic: "Topic",
+        **kwargs,
     ) -> None:
+        super().__init__(strategy_class, topic, **kwargs)
+        self.schema = self.strategy.get_vote_schema()
+        self.is_labeling = True
+
+    def initialize_results(self) -> "VotingResults":
+        return LabelVotingResults()
+
+    async def collect_votes(self, participants: List["Participant"]) -> None:
         logging.info(
-            f"Collecting labeling votes for submission {submission.uuid} from participants."
+            f"Collecting labeling votes for submissions on topic {self.topic.uuid} from participants."
         )
-        tasks = []
-        for participant in participants:
-            task = asyncio.create_task(
-                self.collect_labeling_vote(participant, submission)
+        while not self.submissions_needing_votes.empty():
+            submission = await self.submissions_needing_votes.get()
+            vote_start_time = time.time()
+            tasks = [
+                asyncio.create_task(self.collect_labeling_vote(participant, submission))
+                for participant in participants
+            ]
+            await asyncio.gather(*tasks)
+            logging.info(
+                f"TIMING: Labeling votes collected for submission {submission.uuid} in {time.time() - vote_start_time:.2f} seconds"
             )
-            tasks.append(task)
-        await asyncio.gather(*tasks)
 
     async def collect_labeling_vote(
-        self, participant: "Participant", submission: "Submission"
+        self, participant: "Participant", submission: Submission
     ) -> None:
         vote_json = await participant.get_labeling_vote_response(
-            submission=submission, vote_schema=self.schema
+            submission=submission,
+            vote_schema=self.schema,
+            vote_prompt=self.strategy.get_vote_prompt(submission),
         )
-        # Validate vote data against schema
         try:
             jsonschema.validate(instance=vote_json, schema=self.schema)
-            # Add vote data to participant_votes_data
-            if participant.get_id_str() not in self.participant_votes_data:
-                self.participant_votes_data[participant.get_id_str()] = {
-                    "submissions": {}
-                }
-            self.participant_votes_data[participant.get_id_str()]["submissions"][
-                submission.get_id_str()
-            ] = vote_json
+            self.results.add_vote(participant.uuid, {submission.uuid: vote_json})
         except jsonschema.ValidationError as e:
-            pdb.set_trace()
             logging.error(f"Invalid vote data: {e.message}")
 
-    async def collect_comparative_votes(
-        self, participants: List["Participant"]
+    def get_results(self) -> Dict[str, Any]:
+        logging.info(f"Processing votes for topic {self.topic.uuid}.")
+        self.results.process_votes(self.strategy, self.submission_ids)
+        return self.results.to_json()
+
+
+class ComparativeVotingManager(VotingManager):
+
+    def __init__(
+        self,
+        strategy_class: Type[VotingStrategy],
+        topic: "Topic",
+        **kwargs,
     ) -> None:
+        super().__init__(strategy_class, topic, **kwargs)
+        self.schema = None
+        self.is_labeling = False
+
+    def initialize_results(self) -> "VotingResults":
+        return ComparativeVotingResults()
+
+    async def collect_votes(self, participants: List["Participant"]) -> None:
         logging.info(
             f"Collecting comparative votes for submissions on topic {self.topic.uuid} from participants."
         )
         submissions = await self.get_all_submissions()
-        tasks = []
-        for participant in participants:
-            task = asyncio.create_task(
-                self.collect_comparative_vote(participant, submissions)
-            )
-            tasks.append(task)
+        tasks = [
+            asyncio.create_task(self.collect_comparative_vote(participant, submissions))
+            for participant in participants
+        ]
         await asyncio.gather(*tasks)
 
     async def collect_comparative_vote(
-        self, participant: "Participant", submissions: List["Submission"]
+        self, participant: "Participant", submissions: List[Submission]
     ) -> None:
         vote_json = await participant.get_comparative_vote_response(
-            submissions=submissions, vote_schema=self.schema
+            submissions=submissions,
+            vote_schema=self.schema,
+            vote_prompt=self.strategy.get_vote_prompt(submissions),
         )
-        # Validate vote data against schema
         try:
             jsonschema.validate(instance=vote_json, schema=self.schema)
-            # Add vote data to participant_votes_data
-            self.participant_votes_data[participant.get_id_str()] = vote_json
+            self.results.add_vote(participant.uuid, vote_json)
+            logging.info(
+                f"Comparative vote for topic {self.topic.uuid} from participant {participant.uuid} added to results."
+            )
         except jsonschema.ValidationError as e:
             logging.error(f"Invalid vote data: {e.message}")
 
-    async def get_all_submissions(self) -> List["Submission"]:
+    async def get_all_submissions(self) -> List[Submission]:
         submissions = []
-        while not self.submissions.empty():
-            submission = await self.submissions.get()
+        while not self.submissions_needing_votes.empty():
+            submission = await self.submissions_needing_votes.get()
             submissions.append(submission)
+        self.schema = self.strategy.get_vote_schema(num_submissions=len(submissions))
         return submissions
 
-    def process_votes(self) -> Dict[str, Any]:
+    def get_results(self) -> Dict[str, Any]:
         logging.info(f"Processing votes for topic {self.topic.uuid}.")
-        results = self.strategy.process_votes(self.participant_votes_data)
-        return results
+        self.results.process_votes(self.strategy, self.submission_ids)
+        return self.results.to_json()
 
 
 class VotingManagerFactory:
     @staticmethod
     def create_voting_manager(
         strategy: str,
-        submissions: asyncio.Queue["Submission"],
         topic: "Topic",
         **kwargs,
     ) -> VotingManager:
@@ -134,13 +179,17 @@ class VotingManagerFactory:
 
         Args:
             strategy (str): The name of the voting strategy to use.
+            topic (Topic): The topic associated with the voting manager.
+            **kwargs: Additional keyword arguments.
 
         Returns:
             VotingManager: An instance of VotingManager configured with the specified strategy.
         """
-        # Import the strategy class dynamically
-        strategy_class = globals().get(strategy, None)
+        strategy_class = globals().get(strategy)
         if strategy_class and issubclass(strategy_class, VotingStrategy):
-            return VotingManager(strategy_class, submissions, topic, **kwargs)
+            if strategy_class.is_labeling():
+                return LabelingVotingManager(strategy_class, topic, **kwargs)
+            else:
+                return ComparativeVotingManager(strategy_class, topic, **kwargs)
         else:
             raise ValueError(f"Invalid voting strategy provided: {strategy}")

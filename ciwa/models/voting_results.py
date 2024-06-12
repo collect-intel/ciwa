@@ -1,0 +1,176 @@
+from abc import ABC, abstractmethod
+from typing import List, Dict, Any, Union
+
+
+class VotingResults(ABC):
+    """
+    Abstract base class to hold and manage voting results.
+
+    Attributes:
+        participants (List[str]): List of participant IDs who voted.
+        votes_data (Dict[str, Any]): Raw vote data from each participant.
+        aggregated_results (Dict[str, Any]): Aggregated results of all participant votes.
+    """
+
+    def __init__(self) -> None:
+        self.participants: List[str] = []
+        self.votes_data: Dict[str, Any] = {}
+        self.aggregated_results: Dict[str, Any] = {}
+
+    @abstractmethod
+    def add_vote(self, participant_id: str, vote_data: Any) -> None:
+        """
+        Add a participant's vote to the results.
+
+        Args:
+            participant_id (str): The ID of the participant who voted.
+            vote_data (Any): The raw vote data from the participant.
+        """
+        pass
+
+    @abstractmethod
+    def process_votes(
+        self, strategy: "VotingStrategy", submission_ids: List[str]
+    ) -> None:
+        """
+        Process the raw votes using the provided voting strategy to produce aggregated results.
+                Requires list of submission.uuid's to validate votes against and account for any submissions
+                that didn't receive any votes.
+
+        Args:
+            strategy (VotingStrategy): The voting strategy to use for processing votes.
+            submission_ids (List[str]): List of submission.uuid's that were available for voting on.
+        """
+        pass
+
+    @abstractmethod
+    def to_json(self) -> Dict[str, Any]:
+        """
+        Return a JSON-compatible representation of the voting results.
+
+        Returns:
+            Dict[str, Any]: JSON-compatible representation of the voting results.
+        """
+        pass
+
+
+class LabelVotingResults(VotingResults):
+    """
+    Concrete class to hold and manage labeling voting results.
+
+    Attributes:
+        submissions (Dict[str, List[Dict[str, Any]]]):
+            Dict of key: submission.uuid, value: List of Dicts: (uuid: participant.uuid, vote: vote_json)
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.submissions: Dict[str, List[Dict[str, Any]]] = {}
+
+    def add_vote(self, participant_id: str, vote_data: Dict[str, Any]) -> None:
+        """
+        Add a participant's labeling vote to the results.
+
+        Args:
+            participant_id (str): The ID of the participant who voted.
+            vote_data (Dict[str, Any]): The raw vote data from the participant.
+        """
+        if participant_id not in self.participants:
+            self.participants.append(participant_id)
+        for submission_id, vote in vote_data.items():
+            if submission_id not in self.submissions:
+                self.submissions[submission_id] = []
+            self.submissions[submission_id].append(
+                {"uuid": participant_id, "vote": vote}
+            )
+            if submission_id not in self.votes_data:
+                self.votes_data[submission_id] = {}
+            self.votes_data[submission_id][participant_id] = vote
+
+    def process_votes(
+        self, strategy: "LabelingStrategy", submission_ids: List[str]
+    ) -> None:
+        """
+        Process the raw votes using the provided labeling voting strategy to produce aggregated results.
+
+        Args:
+            strategy (LabelingStrategy): The voting strategy to use for processing votes.
+            submission_ids (List[str]): List of submission.uuid's made available for voting.
+        """
+        self.aggregated_results = strategy.process_votes(self, submission_ids)
+
+    def to_json(self) -> Dict[str, Any]:
+        """
+        Return a JSON-compatible representation of the labeling voting results.
+
+        Returns:
+            Dict[str, Any]: JSON-compatible representation of the labeling voting results.
+        """
+        return {
+            "submissions": [
+                {"uuid": submission_id, "voting_participants": participants}
+                for submission_id, participants in self.submissions.items()
+            ],
+            "aggregated_results": {
+                "submissions": [
+                    {"uuid": submission_id, "result": result}
+                    for submission_id, result in self.aggregated_results.items()
+                ]
+            },
+        }
+
+
+class ComparativeVotingResults(VotingResults):
+    """
+    Concrete class to hold and manage comparative voting results.
+
+    Attributes:
+        submissions (List[str]): List of submission IDs voted on.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def add_vote(self, participant_id: str, vote_data: Any) -> None:
+        """
+        Add a participant's comparative vote to the results.
+
+        Args:
+            participant_id (str): The ID of the participant who voted.
+            vote_data (Any): The raw vote data from the participant.
+        """
+        if participant_id not in self.participants:
+            self.participants.append(participant_id)
+        self.votes_data[participant_id] = vote_data
+
+    def process_votes(
+        self, strategy: "ComparativeVotingStrategy", submission_ids: List[str]
+    ) -> None:
+        """
+        Process the raw votes using the provided comparative voting strategy to produce aggregated results.
+
+        Args:
+            strategy (ComparativeVotingStrategy): The voting strategy to use for processing votes.
+            submission_ids (List[str]): List of submission.uuid's made available for voting.
+        """
+        self.aggregated_results = strategy.process_votes(self, submission_ids)
+
+    def to_json(self) -> Dict[str, Any]:
+        """
+        Return a JSON-compatible representation of the comparative voting results.
+
+        Returns:
+            Dict[str, Any]: JSON-compatible representation of the comparative voting results.
+        """
+        return {
+            "participants": [
+                {"uuid": participant_id, "vote": vote_data}
+                for participant_id, vote_data in self.votes_data.items()
+            ],
+            "aggregated_results": {
+                "submissions": [
+                    {"uuid": submission_id, "result": result}
+                    for submission_id, result in self.aggregated_results.items()
+                ]
+            },
+        }

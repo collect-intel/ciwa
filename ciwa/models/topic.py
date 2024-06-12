@@ -1,13 +1,13 @@
-# filename: ciwa/models/topic.py
+# models/topic.py
 
-from ciwa.models.voting_manager import VotingManagerFactory
-import logging
 import asyncio
+import logging
+from typing import TYPE_CHECKING, Dict, Any
+from ciwa.models.voting_manager import VotingManagerFactory
 from ciwa.models.identifiable import Identifiable
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+if TYPE_CHECKING:
+    from ciwa.models.session import Session
 
 
 class Topic(Identifiable):
@@ -15,6 +15,7 @@ class Topic(Identifiable):
     Represents a topic in a discussion or debate platform, capable of handling submissions and applying a voting strategy.
 
     Attributes:
+        session (Session): The session to which this topic belongs.
         title (str): The title of the topic.
         description (str): A detailed description of what the topic is about.
         voting_manager (VotingManager): The voting manager that handles vote processing for this topic.
@@ -27,27 +28,16 @@ class Topic(Identifiable):
         title: str,
         description: str,
         voting_strategy: str,
-        voting_strategy_config: dict = {},
+        voting_strategy_config: Dict[str, Any] = {},
         **kwargs,
     ) -> None:
-        """
-        Initializes a new Topic with a title, description, and a specified voting strategy.
-
-        Args:
-            session (Session): The session to which this topic belongs.
-            title (str): The title of the topic.
-            description (str): The description of the topic.
-            voting_strategy (str): The name of the voting strategy to be used with this topic.
-            **kwargs: Additional keyword arguments that might be used for future extensions.
-        """
         super().__init__()
         self.session: "Session" = session
         self.title: str = title
         self.description: str = description
-        self.submissions = asyncio.Queue()
+        self.submissions: "Queue" = asyncio.Queue()
         self.voting_manager = VotingManagerFactory.create_voting_manager(
             strategy=voting_strategy,
-            submissions=self.submissions,
             topic=self,
             **voting_strategy_config,
         )
@@ -61,6 +51,7 @@ class Topic(Identifiable):
             submission (Submission): The submission to add to the topic.
         """
         await self.submissions.put(submission)
+        self.voting_manager.add_submission(submission)
         logging.info(
             f"Submission {submission.uuid} added to Topic {self.title} with UUID: {self.uuid}"
         )
@@ -81,7 +72,7 @@ class Topic(Identifiable):
             "required": ["uuid", "title", "description", "voting_strategy"],
         }
 
-    def get_object_json(self) -> dict:
+    def to_json(self) -> dict:
         """
         Returns the JSON representation of the Topic object.
         """
@@ -100,28 +91,25 @@ class TopicFactory:
         Create a Topic instance with flexible parameter input.
 
         Args:
+            session (Session): The session to which this topic belongs.
             **kwargs: Arbitrary keyword arguments. Expected keys:
                 - title (str): Title of the topic.
                 - description (str): Detailed description of the topic.
                 - voting_strategy (str, optional): Strategy for voting, defaults to 'YesNoLabeling'.
-                - max_submissions (int, optional): Maximum submissions allowed, defaults to 10.
+                - voting_strategy_config (dict, optional): Configuration for the voting strategy.
 
         Returns:
             Topic: An instance of Topic configured as specified by the input parameters.
         """
-        # Extract values from kwargs or use defaults
         title = kwargs.get("title", "Default Topic Title")
         description = kwargs.get("description", "No description provided.")
         voting_strategy_config = kwargs.pop("voting_strategy", {})
         voting_strategy = voting_strategy_config.pop("type", "YesNoLabeling")
-        max_submissions = kwargs.get("max_submissions", 10)
 
-        # Return a new Topic instance
         return Topic(
             session=session,
             title=title,
             description=description,
             voting_strategy=voting_strategy,
-            max_submissions=max_submissions,
             voting_strategy_config=voting_strategy_config,
         )

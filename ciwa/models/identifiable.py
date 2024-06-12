@@ -1,4 +1,4 @@
-# File: ./ciwa/models/identifiable.py
+# models/identifiable.py
 
 from abc import ABC
 from uuid import uuid4, UUID

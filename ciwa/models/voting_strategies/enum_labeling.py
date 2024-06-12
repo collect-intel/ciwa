@@ -1,32 +1,33 @@
-# filename: ciwa/models/voting_strategies/enum_labeling.py
+# models/voting_strategies/enum_labeling.py
 
 from typing import List, Dict, Any
 from ciwa.models.voting_strategies.voting_strategy import LabelingStrategy
 from ciwa.models.schema_factory import SchemaFactory
+from ciwa.models.voting_results import VotingResults
 
 
 class EnumLabeling(LabelingStrategy):
-    def __init__(self, enum_values):
+    def __init__(self, enum_values: List[str]):
+        super().__init__()
         self.enum_values = enum_values
         self.vote_schema = self.get_vote_schema()
 
-    def process_votes(self, participant_votes_data: Dict[str, Any]) -> Dict[str, Any]:
-        results = {}
-        for participant_id, data in participant_votes_data.items():
-            for submission_id, vote in data["submissions"].items():
-                if submission_id not in results:
-                    results[submission_id] = {value: 0 for value in self.enum_values}
+    # TODO validate votes against submission_ids
+    def process_votes(
+        self, voting_results: VotingResults, submission_ids: List[str]
+    ) -> Dict[str, Any]:
+        results = {
+            submission_id: {value: 0 for value in self.enum_values}
+            for submission_id in submission_ids
+        }
+        for submission_id, votes in voting_results.votes_data.items():
+            for vote in votes.values():
                 results[submission_id][vote["vote"]] += 1
         return results
 
-    @staticmethod
-    def get_vote_type() -> str:
-        return "enum_vote"
-
     def get_vote_schema(self) -> Dict[str, Any]:
         vote_structure = {"type": "string", "enum": self.enum_values}
-        schema = SchemaFactory.create_object_schema("vote", vote_structure)
-        return schema
+        return SchemaFactory.create_object_schema("vote", vote_structure)
 
     def __str__(self) -> str:
         return "Enum Labeling Strategy"

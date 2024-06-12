@@ -1,17 +1,21 @@
-# filename: ciwa/utils/prompt_loader.py
+# utils/prompt_loader.py
 
 import yaml
 import os
 import inspect
 
+PROMPTS_FILE = "ciwa/config/prompts.yaml"
 
-def load_prompts(yaml_file="ciwa/config/prompts.yaml") -> dict:
+
+def load_prompts(yaml_file: str = PROMPTS_FILE) -> dict:
+    if not os.path.exists(yaml_file):
+        raise FileNotFoundError(f"YAML file not found: {yaml_file}")
     with open(yaml_file, "r") as file:
         prompts = yaml.safe_load(file)
     return prompts
 
 
-def get_prompts(cls: type, yaml_file="ciwa/config/prompts.yaml") -> dict:
+def get_prompts(cls: type, yaml_file: str = PROMPTS_FILE) -> dict:
     """
     Get prompts for a class, merging with parent class prompts.
 

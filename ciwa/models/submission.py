@@ -1,7 +1,12 @@
-# filename: ciwa/models/submission.py
-from typing import List, Optional
+# models/submission.py
+
+from typing import TYPE_CHECKING
 import datetime
 from ciwa.models.identifiable import Identifiable
+
+if TYPE_CHECKING:
+    from ciwa.models.topic import Topic
+    from ciwa.models.participants.participant import Participant
 
 
 class Submission(Identifiable):
@@ -13,10 +18,11 @@ class Submission(Identifiable):
         participant (Participant): The participant who made the submission.
         content (str): The actual content of the submission.
         created_at (datetime.datetime): The timestamp when the submission was created.
-        votes (asyncio.Queue): A queue to handle votes asynchronously.
     """
 
-    def __init__(self, topic: "Topic", participant: "Participant", content: str):
+    def __init__(
+        self, topic: "Topic", participant: "Participant", content: str
+    ) -> None:
         super().__init__()
         self.topic = topic
         self.participant = participant
@@ -39,15 +45,10 @@ class Submission(Identifiable):
                 "content": {"type": "string"},
                 "created_at": {"type": "string"},
             },
-            "required": [
-                "uuid",
-                "participant_uuid",
-                "content",
-                "created_at",
-            ],
+            "required": ["uuid", "participant_uuid", "content", "created_at"],
         }
 
-    def get_object_json(self) -> dict:
+    def to_json(self) -> dict:
         """
         Returns a JSON representation of the Submission object.
         """

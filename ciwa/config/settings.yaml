@@ -11,20 +11,47 @@ process:
     - name: "Default Owner"
       email: "evan@cip.org"
   default_session_settings:
-    max_subs_per_topic: 2 # max submissions from each participant per topic
+    max_subs_per_topic: 5 # max submissions from each participant per topic
+    max_concurrent: 100 # max concurrent requests for submissions
     default_topic_settings:
       voting_strategy:
-        type: "YesNoLabeling"
-      max_submissions: 10 # max submissions total for the topic TODO: remove this once verified that we aren't using this
+        type: "RankingComparison"
     participants:
-      - type: "ConversableAgentParticipant"
-        model: "gpt-3.5"
-        temperature: 0.9
+      - type: "LLMAgentParticipant"
+        model: "gpt-3.5-turbo"
+        temperature: 0.5
+        cache_seed: null
         prompt_template: "default_template"
-      - type: "ConversableAgentParticipant"
-        model: "gpt-3.5"
+      - type: "LLMAgentParticipant"
+        model: "gpt-3.5-turbo"
         prompt_template: "alternative_template"
-        temperature: 0.9
+        temperature: 0.4
+        cache_seed: null
+      - type: "LLMAgentParticipant"
+        model: "gpt-3.5-turbo"
+        prompt_template: "alternative_template"
+        temperature: 0.3
+        cache_seed: null
+      - type: "LLMAgentParticipant"
+        model: "gpt-3.5-turbo"
+        prompt_template: "alternative_template"
+        temperature: 0.2
+        cache_seed: null
+      - type: "LLMAgentParticipant"
+        model: "gpt-3.5-turbo"
+        prompt_template: "alternative_template"
+        temperature: 0.6
+        cache_seed: null
+      - type: "LLMAgentParticipant"
+        model: "gpt-3.5-turbo"
+        prompt_template: "alternative_template"
+        temperature: 0.7
+        cache_seed: null
+      - type: "LLMAgentParticipant"
+        model: "gpt-3.5-turbo"
+        prompt_template: "alternative_template"
+        temperature: 0.8
+        cache_seed: null
   sessions:
     - name: "Demo Session"
       description: "A demo session for CIwA"
@@ -32,7 +59,6 @@ process:
       default_topic_settings:
         voting_strategy:
           type: "YesNoLabeling"
-        max_submissions: 2
       topics:
         - title: "What is a good topic to test this on?"
           description: "Give a submission for what would be a good topic to test this on."
@@ -41,4 +67,3 @@ process:
           voting_strategy:
             type: "EnumLabeling" 
             enum_values: ["A", "B", "C"]
-          max_submissions: 2

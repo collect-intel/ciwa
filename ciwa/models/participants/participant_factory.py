@@ -1,15 +1,10 @@
-# filename: ciwa/models/participants/participant_factory.py
+# models/participants/participant_factory.py
 
-import sys
-from typing import Dict, Any
 import logging
+from typing import Any
 from ciwa.models.participants.llm_agent_participant import LLMAgentParticipant
 from ciwa.models.participants.conversable_agent_participant import (
     ConversableAgentParticipant,
-)
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 
@@ -21,15 +16,15 @@ class ParticipantFactory:
     @staticmethod
     def create_participant(type: str, **kwargs) -> "Participant":
         """
-        Factory method to create a participant of the specified
+        Factory method to create a participant of the specified type.
 
         Args:
-            type: Type of participant to create.
-                              Currently supports 'LLMAgentParticipant' and 'ConversableAgentParticipant'.
-            kwargs: Additional keyword arguments necessary for initializing participants.
+            type (str): Type of participant to create.
+                        Currently supports 'LLMAgentParticipant' and 'ConversableAgentParticipant'.
+            kwargs (Any): Additional keyword arguments necessary for initializing participants.
 
         Returns:
-            An instance of Participant.
+            Participant: An instance of Participant.
 
         Raises:
             ValueError: If the type is not supported.

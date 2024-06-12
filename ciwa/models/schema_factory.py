@@ -1,4 +1,4 @@
-# filename: ciwa/models/schema_factory.py
+# models/schema_factory.py
 
 from typing import Dict, Any
 import jsonschema
@@ -13,8 +13,18 @@ class SchemaFactory:
         object_type: str, object_schema: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Creates a schema for a model object. For consistency json for objects should take the form {"object_type": <something>},
+        Creates a schema for a model object. For consistency, JSON for objects should take the form {"object_type": <something>},
         where <something> is defined by the object_schema.
+
+        Args:
+            object_type (str): The type of object for which to create the schema.
+            object_schema (Dict[str, Any]): The schema definition for the object.
+
+        Returns:
+            Dict[str, Any]: The complete schema for the object.
+
+        Raises:
+            ValueError: If the object_type is not supported.
         """
         if object_type not in SchemaFactory.OBJECT_TYPES:
             raise ValueError(
@@ -33,6 +43,15 @@ class SchemaFactory:
 
     @staticmethod
     def validate_schema(schema: Dict[str, Any]) -> None:
+        """
+        Validates a JSON schema.
+
+        Args:
+            schema (Dict[str, Any]): The schema to validate.
+
+        Raises:
+            ValueError: If the schema is invalid.
+        """
         try:
             Draft7Validator.check_schema(schema)
         except jsonschema.exceptions.SchemaError as e:

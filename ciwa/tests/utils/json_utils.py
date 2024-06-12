@@ -1,13 +1,16 @@
+# tests/utils/json_utils.py
+
 import random
 import uuid
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 import string
 import jsonschema
 import json
 
 
-def generate_random_text(length: int = 10) -> str:
-    return "".join(random.choices(string.ascii_letters + string.digits + " ", k=length))
+def generate_random_text(length=10) -> str:
+    letters = string.ascii_lowercase
+    return "".join(random.choice(letters) for i in range(length))
 
 
 def generate_fake_json(schema: Dict[str, Any]) -> Dict[str, Any]:
@@ -17,12 +20,24 @@ def generate_fake_json(schema: Dict[str, Any]) -> Dict[str, Any]:
         if prop_schema["type"] == "boolean":
             return random.choice([True, False])
         elif prop_schema["type"] == "integer":
-            return random.randint(1, 100)
+            minimum = prop_schema.get("minimum", 1)
+            maximum = prop_schema.get("maximum", 100)
+            return random.randint(minimum, maximum)
         elif prop_schema["type"] == "string":
             return generate_random_text()
         elif prop_schema["type"] == "array":
             item_schema = prop_schema["items"]
-            return [generate_value(item_schema) for _ in range(random.randint(1, 5))]
+            min_items = prop_schema.get("minItems", 1)
+            max_items = prop_schema.get("maxItems", 5)
+            if prop_schema.get("uniqueItems", False):
+                range_min = item_schema.get("minimum", 1)
+                range_max = item_schema.get("maximum", 100)
+                return random.sample(range(range_min, range_max + 1), max_items)
+            else:
+                return [
+                    generate_value(item_schema)
+                    for _ in range(random.randint(min_items, max_items))
+                ]
         elif prop_schema["type"] == "object":
             return generate_fake_json(prop_schema)
         return None
@@ -33,12 +48,11 @@ def generate_fake_json(schema: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-# Function to validate JSON against a schema
-def is_valid_json_for_schema(json_data: Dict[str, Any], schema: Dict[str, Any]) -> None:
+def is_valid_json_for_schema(json_data: Dict[str, Any], schema: Dict[str, Any]) -> bool:
     try:
         jsonschema.validate(instance=json_data, schema=schema)
         return True
-    except jsonschema.exceptions.ValidationError as err:
+    except jsonschema.exceptions.ValidationError:
         return False
 
 
