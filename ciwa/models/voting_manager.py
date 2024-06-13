@@ -6,6 +6,8 @@ from ciwa.models.voting_strategies.voting_strategy import VotingStrategy
 from ciwa.models.voting_strategies.enum_labeling import EnumLabeling
 from ciwa.models.voting_strategies.yes_no_labeling import YesNoLabeling
 from ciwa.models.voting_strategies.ranking_comparison import RankingComparison
+from ciwa.models.voting_strategies.score_labeling import ScoreLabeling
+from ciwa.models.voting_strategies.score_comparison import ScoreComparison
 from ciwa.models.submission import Submission
 from ciwa.models.voting_results import LabelVotingResults, ComparativeVotingResults
 import time

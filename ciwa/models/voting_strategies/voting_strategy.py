@@ -72,12 +72,14 @@ class LabelingStrategy(VotingStrategy, ABC):
     def get_vote_schema(self) -> Dict[str, Any]:
         pass
 
-    def get_vote_prompt(self, submission: "Submission") -> str:
+    def get_vote_prompt(self, submission: "Submission", **kwargs) -> str:
         if isinstance(submission, Submission):
-            return self.vote_prompt.format(submission_content=submission.content)
+            return self.vote_prompt.format(
+                submission_content=submission.content, **kwargs
+            )
         else:
             raise TypeError(
-                "get_vote_prompt() requires a single string submission content for labeling strategies."
+                "get_vote_prompt() requires a single submission for labeling strategies."
             )
 
 
@@ -98,7 +100,7 @@ class ComparativeVotingStrategy(VotingStrategy, ABC):
     def get_vote_schema(self, num_submissions: int) -> Dict[str, Any]:
         pass
 
-    def get_vote_prompt(self, submissions: List["Submission"]) -> str:
+    def get_vote_prompt(self, submissions: List["Submission"], **kwargs) -> str:
         if isinstance(submissions, list):
             submissions_contents_str = ""
             for i, submission in enumerate(submissions):
@@ -106,9 +108,9 @@ class ComparativeVotingStrategy(VotingStrategy, ABC):
                     f"Submission {i + 1}:\n{submission.content}\n\n"
                 )
             return self.vote_prompt.format(
-                submissions_contents=submissions_contents_str
+                submissions_contents=submissions_contents_str, **kwargs
             )
         else:
             raise TypeError(
-                "get_vote_prompt() requires a list of string submission contents for comparative strategies."
+                "get_vote_prompt() requires a list of submissions for comparative strategies."
             )

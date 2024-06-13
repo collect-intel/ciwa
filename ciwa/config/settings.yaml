@@ -67,3 +67,10 @@ process:
           voting_strategy:
             type: "EnumLabeling" 
             enum_values: ["A", "B", "C"]
+        - title: "What is a good starting move for Chess?"
+          description: "Give a submission for what would be a good starting move for Chess, in Standard Algebraic Notation (SAN)."
+          voting_strategy:
+            type: "ScoreComparison"
+            start_value: 1
+            end_value: 10
+            increment_value: 1
