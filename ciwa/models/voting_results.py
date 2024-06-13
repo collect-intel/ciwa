@@ -31,15 +31,15 @@ class VotingResults(ABC):
 
     @abstractmethod
     def process_votes(
-        self, strategy: "VotingStrategy", submission_ids: List[str]
+        self, voting_method: "VotingMethod", submission_ids: List[str]
     ) -> None:
         """
-        Process the raw votes using the provided voting strategy to produce aggregated results.
+        Process the raw votes using the provided voting voting_method to produce aggregated results.
                 Requires list of submission.uuid's to validate votes against and account for any submissions
                 that didn't receive any votes.
 
         Args:
-            strategy (VotingStrategy): The voting strategy to use for processing votes.
+            voting_method (VotingMethod): The voting voting_method to use for processing votes.
             submission_ids (List[str]): List of submission.uuid's that were available for voting on.
         """
         pass
@@ -57,7 +57,7 @@ class VotingResults(ABC):
 
 class LabelVotingResults(VotingResults):
     """
-    Concrete class to hold and manage labeling voting results.
+    Concrete class to hold and manage label voting results.
 
     Attributes:
         submissions (Dict[str, List[Dict[str, Any]]]):
@@ -70,7 +70,7 @@ class LabelVotingResults(VotingResults):
 
     def add_vote(self, participant_id: str, vote_data: Dict[str, Any]) -> None:
         """
-        Add a participant's labeling vote to the results.
+        Add a participant's label vote to the results.
 
         Args:
             participant_id (str): The ID of the participant who voted.
@@ -91,23 +91,23 @@ class LabelVotingResults(VotingResults):
             self.votes_data[submission_id][participant_id] = vote
 
     def process_votes(
-        self, strategy: "LabelingStrategy", submission_ids: List[str]
+        self, voting_method: "LabelVotingMethod", submission_ids: List[str]
     ) -> None:
         """
-        Process the raw votes using the provided labeling voting strategy to produce aggregated results.
+        Process the raw votes using the provided label voting voting_method to produce aggregated results.
 
         Args:
-            strategy (LabelingStrategy): The voting strategy to use for processing votes.
+            voting_method (LabelVotingMethod): The voting voting_method to use for processing votes.
             submission_ids (List[str]): List of submission.uuid's made available for voting.
         """
-        self.aggregated_results = strategy.process_votes(self, submission_ids)
+        self.aggregated_results = voting_method.process_votes(self, submission_ids)
 
     def to_json(self) -> Dict[str, Any]:
         """
-        Return a JSON-compatible representation of the labeling voting results.
+        Return a JSON-compatible representation of the label voting results.
 
         Returns:
-            Dict[str, Any]: JSON-compatible representation of the labeling voting results.
+            Dict[str, Any]: JSON-compatible representation of the label voting results.
         """
         return {
             "submissions": [
@@ -137,9 +137,9 @@ class LabelVotingResults(VotingResults):
         }
 
 
-class ComparativeVotingResults(VotingResults):
+class CompareVotingResults(VotingResults):
     """
-    Concrete class to hold and manage comparative voting results.
+    Concrete class to hold and manage compare voting results.
 
     Attributes:
         submissions (List[str]): List of submission IDs voted on.
@@ -150,7 +150,7 @@ class ComparativeVotingResults(VotingResults):
 
     def add_vote(self, participant_id: str, vote_data: Any) -> None:
         """
-        Add a participant's comparative vote to the results.
+        Add a participant's compare vote to the results.
 
         Args:
             participant_id (str): The ID of the participant who voted.
@@ -162,23 +162,23 @@ class ComparativeVotingResults(VotingResults):
         self.votes_data[participant_id] = vote_data
 
     def process_votes(
-        self, strategy: "ComparativeVotingStrategy", submission_ids: List[str]
+        self, voting_method: "CompareVotingMethod", submission_ids: List[str]
     ) -> None:
         """
-        Process the raw votes using the provided comparative voting strategy to produce aggregated results.
+        Process the raw votes using the provided compare voting voting_method to produce aggregated results.
 
         Args:
-            strategy (ComparativeVotingStrategy): The voting strategy to use for processing votes.
+            voting_method (CompareVotingMethod): The voting voting_method to use for processing votes.
             submission_ids (List[str]): List of submission.uuid's made available for voting.
         """
-        self.aggregated_results = strategy.process_votes(self, submission_ids)
+        self.aggregated_results = voting_method.process_votes(self, submission_ids)
 
     def to_json(self) -> Dict[str, Any]:
         """
-        Return a JSON-compatible representation of the comparative voting results.
+        Return a JSON-compatible representation of the compare voting results.
 
         Returns:
-            Dict[str, Any]: JSON-compatible representation of the comparative voting results.
+            Dict[str, Any]: JSON-compatible representation of the compare voting results.
         """
         return {
             "voting_participants": [

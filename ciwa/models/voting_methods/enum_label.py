@@ -1,12 +1,12 @@
-# models/voting_strategies/enum_labeling.py
+# models/voting_methods/enum_label.py
 
 from typing import List, Dict, Any
-from ciwa.models.voting_strategies.voting_strategy import LabelingStrategy
+from ciwa.models.voting_methods.voting_method import LabelVotingMethod
 from ciwa.models.schema_factory import SchemaFactory
 from ciwa.models.voting_results import VotingResults
 
 
-class EnumLabeling(LabelingStrategy):
+class EnumLabel(LabelVotingMethod):
     def __init__(self, enum_values: List[str]):
         super().__init__()
         self.enum_values = enum_values
@@ -30,4 +30,4 @@ class EnumLabeling(LabelingStrategy):
         return SchemaFactory.create_object_schema("vote", vote_structure)
 
     def __str__(self) -> str:
-        return "Enum Labeling Strategy"
+        return "Enum Label Method"

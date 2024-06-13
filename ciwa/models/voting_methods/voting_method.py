@@ -1,4 +1,4 @@
-# filename: ciwa/strategies/voting_strategies/voting_strategy.py
+# filename: ciwa/voting_methods/voting_method.py
 
 from abc import ABC, abstractmethod
 from typing import List, TypeVar, Any, Dict
@@ -7,9 +7,9 @@ from ciwa.models.submission import Submission
 from ciwa.models.voting_results import VotingResults
 
 
-class VotingStrategy(ABC):
+class VotingMethod(ABC):
     """
-    Abstract base class for voting strategies.
+    Abstract base class for voting voting methods.
     """
 
     def __init__(self) -> None:
@@ -27,7 +27,7 @@ class VotingStrategy(ABC):
             submission_ids (List[str]): List of submission.uuid's that were available for voting.
                 Allows aggregate results to return empty/none values for submissions that received no votes.
         Returns:
-            Any: The result of the vote processing, specific to the strategy.
+            Any: The result of the vote processing, specific to the voting_method.
         """
         pass
 
@@ -47,17 +47,17 @@ class VotingStrategy(ABC):
 
     @staticmethod
     @abstractmethod
-    def is_labeling() -> bool:
+    def is_label() -> bool:
         pass
 
     def __str__(self) -> str:
-        return f"{self.__class__.__name__} Voting Strategy"
+        return f"{self.__class__.__name__} Voting Method"
 
 
-class LabelingStrategy(VotingStrategy, ABC):
+class LabelVotingMethod(VotingMethod, ABC):
     """
-    Abstract VotingStrategy class implementing a labeling voting rule,
-    where votes are given on Submissions independently without comparison to other Submissions,
+    Abstract VotingMethod class implementing a label voting rule,
+    where votes are given on Submissions independently without compare to other Submissions,
     effectively applying a label to each Submission.
     """
 
@@ -65,7 +65,7 @@ class LabelingStrategy(VotingStrategy, ABC):
         super().__init__()
 
     @staticmethod
-    def is_labeling() -> bool:
+    def is_label() -> bool:
         return True
 
     @abstractmethod
@@ -79,13 +79,13 @@ class LabelingStrategy(VotingStrategy, ABC):
             )
         else:
             raise TypeError(
-                "get_vote_prompt() requires a single submission for labeling strategies."
+                "get_vote_prompt() requires a single submission for label voting methods."
             )
 
 
-class ComparativeVotingStrategy(VotingStrategy, ABC):
+class CompareVotingMethod(VotingMethod, ABC):
     """
-    Abstract VotingStrategy class implementing a comparative voting rule,
+    Abstract VotingMethod class implementing a compare voting rule,
     where votes are given on a set of Submissions by comparing them to each other.
     """
 
@@ -93,7 +93,7 @@ class ComparativeVotingStrategy(VotingStrategy, ABC):
         super().__init__()
 
     @staticmethod
-    def is_labeling() -> bool:
+    def is_label() -> bool:
         return False
 
     @abstractmethod
@@ -112,5 +112,5 @@ class ComparativeVotingStrategy(VotingStrategy, ABC):
             )
         else:
             raise TypeError(
-                "get_vote_prompt() requires a list of submissions for comparative strategies."
+                "get_vote_prompt() requires a list of submissions for compare voting methods."
             )

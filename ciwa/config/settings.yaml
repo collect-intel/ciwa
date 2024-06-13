@@ -14,8 +14,8 @@ process:
     max_subs_per_topic: 5 # max submissions from each participant per topic
     max_concurrent: 100 # max concurrent requests for submissions
     default_topic_settings:
-      voting_strategy:
-        type: "RankingComparison"
+      voting_method:
+        type: "RankingCompare"
     participants:
       - type: "LLMAgentParticipant"
         model: "gpt-3.5-turbo"
@@ -57,20 +57,20 @@ process:
       description: "A demo session for CIwA"
       next_session: "Demo Session" # re-run the same session
       default_topic_settings:
-        voting_strategy:
-          type: "YesNoLabeling"
+        voting_method:
+          type: "YesNoLabel"
       topics:
         - title: "What is a good topic to test this on?"
           description: "Give a submission for what would be a good topic to test this on."
         - title: "What are 3 topics that would be good to test this on?"
           description: "Give a submission with 3 different topics, enumerated A. B. C. for what would be good to test this on."
-          voting_strategy:
-            type: "EnumLabeling" 
+          voting_method:
+            type: "EnumLabel" 
             enum_values: ["A", "B", "C"]
         - title: "What is a good starting move for Chess?"
           description: "Give a submission for what would be a good starting move for Chess, in Standard Algebraic Notation (SAN)."
-          voting_strategy:
-            type: "ScoreComparison"
+          voting_method:
+            type: "ScoreCompare"
             start_value: 1
             end_value: 10
             increment_value: 1

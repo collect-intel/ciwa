@@ -1,7 +1,7 @@
-# models/voting_strategies/score_comparison.py
+# models/voting_methods/score_compare.py
 
 from typing import Dict, Any, List
-from ciwa.models.voting_strategies.voting_strategy import ComparativeVotingStrategy
+from ciwa.models.voting_methods.voting_method import CompareVotingMethod
 from ciwa.models.schema_factory import SchemaFactory
 from ciwa.models.voting_results import VotingResults
 
@@ -9,7 +9,7 @@ from ciwa.models.voting_results import VotingResults
 ROUND_NDIGITS = 3
 
 
-class ScoreComparison(ComparativeVotingStrategy):
+class ScoreCompare(CompareVotingMethod):
 
     def __init__(self, start_value: int, end_value: int, increment_value: int = None):
         super().__init__()

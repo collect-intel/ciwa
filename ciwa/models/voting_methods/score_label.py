@@ -1,7 +1,7 @@
-# models/voting_strategies/score_labeling.py
+# models/voting_methods/score_label.py
 
 from typing import List, Dict, Any
-from ciwa.models.voting_strategies.voting_strategy import LabelingStrategy
+from ciwa.models.voting_methods.voting_method import LabelVotingMethod
 from ciwa.models.schema_factory import SchemaFactory
 from ciwa.models.voting_results import VotingResults
 
@@ -9,7 +9,7 @@ from ciwa.models.voting_results import VotingResults
 ROUND_NDIGITS = 3
 
 
-class ScoreLabeling(LabelingStrategy):
+class ScoreLabel(LabelVotingMethod):
 
     def __init__(self, start_value: int, end_value: int, increment_value: int = None):
         super().__init__()

@@ -57,11 +57,11 @@ class Participant(Identifiable, ABC):
         pass
 
     @abstractmethod
-    async def get_labeling_vote_response(
+    async def get_label_vote_response(
         self, submission: "Submission", vote_schema: Dict[str, Any], vote_prompt: str
     ) -> Dict:
         """
-        Generates a labeling vote for a given submission.
+        Generates a label vote for a given submission.
 
         Args:
             submission (Submission): The submission for which the vote is cast.
@@ -74,14 +74,14 @@ class Participant(Identifiable, ABC):
         pass
 
     @abstractmethod
-    async def get_comparative_vote_response(
+    async def get_compare_vote_response(
         self,
         submissions: List["Submission"],
         vote_schema: Dict[str, Any],
         vote_prompt: str,
     ) -> Dict:
         """
-        Generates a comparative vote for a list of submissions.
+        Generates a compare vote for a list of submissions.
 
         Args:
             submissions (List[Submission]): The list of submissions to compare.

@@ -11,14 +11,14 @@ ConversableAgentParticipant:
   system_message: "You are a ConversableAgentParticipant. Welcome to the {process_name}. This is a {process_description}."
 
 
-LabelingStrategy:
+LabelVotingMethod:
   vote_prompt:  "Please provide your vote for the following submission:\n{submission_content}"
 
-ComparativeVotingStrategy:
+CompareVotingMethod:
   vote_prompt: "Please provide your vote for the following submissions:\n{submissions_contents}"
 
-RankingComparison:
+RankingCompare:
   vote_prompt: "Please rank the following submissions from your most preferred to least preferred:\n\n{submissions_contents}\n\nReturn the rankings as a list of submission numbers, where the first item is your top preference and the last item is your least preferred."
 
-ScoreLabeling:
+ScoreLabel:
   vote_prompt: "Please provide your score for the following submission:\n{submission_content}\nChoose a value from: {values}"

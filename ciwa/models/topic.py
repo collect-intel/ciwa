@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class Topic(Identifiable):
     """
-    Represents a topic in a discussion or debate platform, capable of handling submissions and applying a voting strategy.
+    Represents a topic in a discussion or debate platform, capable of handling submissions and applying a voting voting_method.
 
     Attributes:
         session (Session): The session to which this topic belongs.
@@ -27,8 +27,8 @@ class Topic(Identifiable):
         session: "Session",
         title: str,
         description: str,
-        voting_strategy: str,
-        voting_strategy_config: Dict[str, Any] = {},
+        voting_method: str,
+        voting_method_config: Dict[str, Any] = {},
         **kwargs,
     ) -> None:
         super().__init__()
@@ -38,9 +38,9 @@ class Topic(Identifiable):
         self.submissions: List["Submission"] = []
         self.submissions_queue: "Queue" = asyncio.Queue()
         self.voting_manager = VotingManagerFactory.create_voting_manager(
-            strategy=voting_strategy,
+            voting_method=voting_method,
             topic=self,
-            **voting_strategy_config,
+            **voting_method_config,
         )
         logging.info(f"Topic initialized with UUID: {self.uuid}")
 
@@ -69,9 +69,9 @@ class Topic(Identifiable):
                 "uuid": {"type": "string"},
                 "title": {"type": "string"},
                 "description": {"type": "string"},
-                "voting_strategy": {"type": "string"},
+                "voting_method": {"type": "string"},
             },
-            "required": ["uuid", "title", "description", "voting_strategy"],
+            "required": ["uuid", "title", "description", "voting_method"],
         }
 
     def to_json(self) -> dict:
@@ -82,7 +82,7 @@ class Topic(Identifiable):
             "uuid": str(self.uuid),
             "title": self.title,
             "description": self.description,
-            "voting_strategy": self.voting_manager.strategy.__class__.__name__,
+            "voting_method": self.voting_manager.voting_method.__class__.__name__,
             "submissions": [submission.to_json() for submission in self.submissions],
         }
 
@@ -98,21 +98,21 @@ class TopicFactory:
             **kwargs: Arbitrary keyword arguments. Expected keys:
                 - title (str): Title of the topic.
                 - description (str): Detailed description of the topic.
-                - voting_strategy (str, optional): Strategy for voting, defaults to 'YesNoLabeling'.
-                - voting_strategy_config (dict, optional): Configuration for the voting strategy.
+                - voting_method (str, optional): Method for voting, defaults to 'YesNoLabel'.
+                - voting_method_config (dict, optional): Configuration for the voting voting_method.
 
         Returns:
             Topic: An instance of Topic configured as specified by the input parameters.
         """
         title = kwargs.get("title", "Default Topic Title")
         description = kwargs.get("description", "No description provided.")
-        voting_strategy_config = kwargs.pop("voting_strategy", {})
-        voting_strategy = voting_strategy_config.pop("type", "YesNoLabeling")
+        voting_method_config = kwargs.pop("voting_method", {})
+        voting_method = voting_method_config.pop("type", "YesNoLabel")
 
         return Topic(
             session=session,
             title=title,
             description=description,
-            voting_strategy=voting_strategy,
-            voting_strategy_config=voting_strategy_config,
+            voting_method=voting_method,
+            voting_method_config=voting_method_config,
         )

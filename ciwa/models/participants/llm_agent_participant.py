@@ -138,18 +138,18 @@ class LLMAgentParticipant(Participant):
         logging.info(f"Vote response received: {vote_json}")
         return vote_json
 
-    async def get_labeling_vote_response(
+    async def get_label_vote_response(
         self, submission: Submission, vote_schema: dict, vote_prompt: str
     ) -> dict:
         content = submission.content
-        # vote_prompt = self.get_labeling_vote_prompt(content)
+        # vote_prompt = self.get_label_vote_prompt(content)
         vote_json = await self._get_vote_response(vote_prompt, vote_schema)
         logging.info(
             f"{self.__class__.__name__} {self.uuid} voted with label on submission {submission.uuid}"
         )
         return vote_json
 
-    async def get_comparative_vote_response(
+    async def get_compare_vote_response(
         self, submissions: List[Submission], vote_schema: dict, vote_prompt: str
     ) -> dict:
         content = "\n\n".join(
@@ -159,10 +159,10 @@ class LLMAgentParticipant(Participant):
             ]
         )
 
-        # vote_prompt = self.get_comparative_vote_prompt(content)
+        # vote_prompt = self.get_compare_vote_prompt(content)
         vote_json = await self._get_vote_response(vote_prompt, vote_schema)
         logging.info(
-            f"{self.__class__.__name__} {self.uuid} voted comparatively on submissions {[submission.uuid for submission in submissions]}"
+            f"{self.__class__.__name__} {self.uuid} voted comparely on submissions {[submission.uuid for submission in submissions]}"
         )
         return vote_json
 
