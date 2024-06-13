@@ -30,6 +30,10 @@ class ConversableAgentParticipant(LLMAgentParticipant):
             if key in kwargs
         }
 
+        print(
+            f"Creating ConversableAgent with config: {config_list} and kwargs: {agent_kwargs}"
+        )
+
         return autogen.ConversableAgent(
             name="assistant",
             llm_config={"config_list": config_list, **agent_kwargs},

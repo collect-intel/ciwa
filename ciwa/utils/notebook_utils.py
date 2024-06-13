@@ -18,7 +18,13 @@ def visualize_session(session: Session) -> None:
     for topic in session.topics:
         G.add_node(topic.title, label=topic.title)
         for submission in topic.submissions:
-            G.add_edge(topic.title, submission.content[:30])
+            char_limit = 100
+            submission_content = (
+                f"{submission.content[:char_limit]}..."
+                if len(submission.content) > char_limit
+                else f"{submission.content}"
+            )
+            G.add_edge(topic.title, submission_content)
 
     plt.figure(figsize=(10, 8))
     pos = nx.spring_layout(G)
@@ -26,9 +32,9 @@ def visualize_session(session: Session) -> None:
         G,
         pos,
         with_labels=True,
-        node_size=3000,
+        node_size=1000,
         node_color="skyblue",
-        font_size=10,
+        font_size=9,
         font_weight="bold",
     )
     plt.title("Session Topics and Submissions")

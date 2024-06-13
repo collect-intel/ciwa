@@ -19,6 +19,7 @@ class Participant(Identifiable, ABC):
         Initializes a new Participant instance with a unique identifier.
         """
         super().__init__()
+        self.type = f"{self.__class__.__name__}"
 
     @abstractmethod
     async def generate_submissions(

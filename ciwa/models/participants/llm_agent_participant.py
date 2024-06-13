@@ -175,7 +175,7 @@ class LLMAgentParticipant(Participant):
                 "model": {"type": "string"},
                 "type": {
                     "type": "string",
-                    "const": f"{self.__class__.__name__}",
+                    "const": self.type,
                 },
             },
             "required": ["uuid", "model"],

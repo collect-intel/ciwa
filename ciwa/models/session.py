@@ -26,6 +26,7 @@ class Session(Identifiable):
         participants_config: List[Dict[str, Any]] = [],
         max_subs_per_topic: int = 1,
         max_concurrent: int = 50,
+        save_results: bool = True,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -42,6 +43,7 @@ class Session(Identifiable):
         self.max_concurrent: int = max_concurrent
         self.max_subs_per_topic: int = max_subs_per_topic
         self.results: Dict[str, Any] = {}
+        self.save_results: bool = save_results
         logging.info(f"Session initialized with UUID: {self.uuid}")
         logging.info(f"Session topics: {[topic.title for topic in self.topics]}")
 
@@ -83,6 +85,13 @@ class Session(Identifiable):
         self.participants.append(new_participant)
 
         logging.info(f"Added new participant: {new_participant.uuid}")
+
+    def add_participants(self, participants_config: List[Dict[str, Any]]) -> None:
+        """
+        Add multiple participants to the session.
+        """
+        for participant_config in participants_config:
+            self.add_participant(participant_config)
 
     def add_topic(
         self, topic_config: Dict[str, Any], default_topic_settings: Dict[str, Any] = {}
@@ -153,7 +162,8 @@ class Session(Identifiable):
         """
         self.is_complete = True
         logging.info(f"Session {self.uuid} completed.")
-        self.save_results()
+        if self.save_results:
+            self.save_results()
 
     async def collect_all_votes(self) -> None:
         logging.info("Collecting votes on topics.")
