@@ -95,6 +95,22 @@ class Process(Identifiable):
             else:
                 logging.error(f"Attempted to update non-existing attribute {key}")
 
+    def add_session(self, session_config: Dict[str, Any]) -> None:
+        new_session = SessionFactory.create_session(process=self, **session_config)
+        self.pending_sessions.append(new_session)
+        logging.info(f"Added new session: {new_session.name}")
+
+    def update_session(self, session_id: str, updates: Dict[str, Any]) -> None:
+        for session in self.pending_sessions:
+            if session.uuid == session_id:
+                for key, value in updates.items():
+                    if hasattr(session, key):
+                        setattr(session, key, value)
+                        logging.info(
+                            f"Updated session {session_id}: set {key} to {value}"
+                        )
+                break
+
     async def run_next_session(self) -> None:
         """
         Runs the next session in the process.
@@ -155,7 +171,7 @@ class Process(Identifiable):
 
 
 async def main() -> None:
-    config_manager = ConfigManager("ciwa/config/settings.yaml")
+    config_manager = ConfigManager(config_path="ciwa/config/settings.yaml")
     process = ProcessFactory.create_process()
 
     logging.info(f"Process {process.name} initialized with UUID: {process.uuid}")

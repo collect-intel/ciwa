@@ -1,0 +1,95 @@
+2024-06-13 13:45:40,430 - WARNING - Matplotlib is building the font cache; this may take a moment.
+2024-06-13 13:45:44,861 - INFO - Failed to extract font properties from /System/Library/Fonts/Apple Color Emoji.ttc: In FT2Font: Could not set the fontsize (invalid pixel size; error code 0x17)
+2024-06-13 13:45:44,921 - INFO - Failed to extract font properties from /System/Library/Fonts/Supplemental/NISC18030.ttf: In FT2Font: Could not set the fontsize (invalid pixel size; error code 0x17)
+2024-06-13 13:45:44,923 - INFO - Failed to extract font properties from /System/Library/Fonts/LastResort.otf: tuple indices must be integers or slices, not str
+2024-06-13 13:45:44,992 - INFO - generated new fontManager
+2024-06-13 13:53:27,259 - INFO - Process initialized with default configurations.
+2024-06-13 13:54:32,600 - INFO - VotingManager initialized with voting_method: RankingCompare
+2024-06-13 13:54:32,601 - INFO - Topic initialized with UUID: 52eadd5b-5375-49ba-a12d-615d094c6d16
+2024-06-13 13:54:32,605 - INFO - LLMAgentParticipant initialized with model: gpt-3.5-turbo
+2024-06-13 13:54:32,606 - INFO - Session initialized with UUID: ba1802c0-41cb-4f43-964e-5b3c8ca76872
+2024-06-13 13:54:32,607 - INFO - Session topics: ['What is a good topic to test this on?']
+2024-06-13 13:54:32,607 - INFO - Process initialized with default configurations.
+2024-06-13 13:54:36,030 - INFO - VotingManager initialized with voting_method: YesNoLabel
+2024-06-13 13:54:36,031 - INFO - Topic initialized with UUID: 9bc2eaf4-4cb6-41be-bec7-91bf1797c295
+2024-06-13 13:54:36,035 - INFO - ConversableAgentParticipant initialized with model: gpt-4
+2024-06-13 13:54:36,036 - INFO - Loading config from: /Users/evan/Documents/GitHub/notebooks/coding/ciwa/config/OAI_CONFIG_LIST.json
+2024-06-13 14:08:37,407 - INFO - VotingManager initialized with voting_method: YesNoLabel
+2024-06-13 14:08:37,409 - INFO - Topic initialized with UUID: ce9ee593-b11f-4798-a6ad-2302cfef5994
+2024-06-13 14:08:37,411 - INFO - ConversableAgentParticipant initialized with model: gpt-4
+2024-06-13 14:08:37,412 - INFO - Loading config from: /Users/evan/Documents/GitHub/notebooks/coding/ciwa/config/OAI_CONFIG_LIST.json
+2024-06-13 14:08:47,196 - INFO - Process initialized with default configurations.
+2024-06-13 14:09:00,859 - INFO - Process initialized with default configurations.
+2024-06-13 14:09:02,811 - INFO - VotingManager initialized with voting_method: YesNoLabel
+2024-06-13 14:09:02,812 - INFO - Topic initialized with UUID: 2baf467a-41c4-437e-aa2a-aa91c3829017
+2024-06-13 14:09:02,816 - INFO - ConversableAgentParticipant initialized with model: gpt-4
+2024-06-13 14:09:02,817 - INFO - Loading config from: /Users/evan/Documents/GitHub/notebooks/coding/ciwa/config/OAI_CONFIG_LIST.json
+2024-06-13 14:09:17,475 - INFO - VotingManager initialized with voting_method: RankingCompare
+2024-06-13 14:09:17,475 - INFO - Topic initialized with UUID: 1e433a18-d460-4042-a205-1c3f59dfb439
+2024-06-13 14:09:17,480 - INFO - LLMAgentParticipant initialized with model: gpt-3.5-turbo
+2024-06-13 14:09:17,480 - INFO - Session initialized with UUID: 9b7de2fa-2bbb-4cdb-a105-412d432c73cd
+2024-06-13 14:09:17,481 - INFO - Session topics: ['What is a good topic to test this on?']
+2024-06-13 14:09:17,481 - INFO - Process initialized with default configurations.
+2024-06-13 14:09:20,747 - INFO - VotingManager initialized with voting_method: YesNoLabel
+2024-06-13 14:09:20,748 - INFO - Topic initialized with UUID: b3581c15-58af-4e2c-9c18-81ff47effc78
+2024-06-13 14:09:20,753 - INFO - ConversableAgentParticipant initialized with model: gpt-4
+2024-06-13 14:09:20,753 - INFO - Loading config from: /Users/evan/Documents/GitHub/notebooks/coding/ciwa/config/OAI_CONFIG_LIST.json
+2024-06-13 14:09:20,755 - ERROR - Expected exactly one config for model gpt-4, but found 0
+2024-06-13 14:09:51,381 - INFO - VotingManager initialized with voting_method: YesNoLabel
+2024-06-13 14:09:51,383 - INFO - Topic initialized with UUID: 740559c1-42c1-4bd0-921a-fb3a44ec6369
+2024-06-13 14:09:51,386 - INFO - ConversableAgentParticipant initialized with model: gpt-3.5-turbo
+2024-06-13 14:09:51,386 - INFO - Loading config from: /Users/evan/Documents/GitHub/notebooks/coding/ciwa/config/OAI_CONFIG_LIST.json
+2024-06-13 14:09:51,413 - WARNING - The API key specified is not a valid OpenAI format; it won't work with the OpenAI-hosted model.
+2024-06-13 14:09:51,415 - INFO - Session initialized with UUID: b25ba3b1-e890-4180-a8a1-60634d176333
+2024-06-13 14:09:51,415 - INFO - Session topics: ['What are some interesting AI challenges?']
+2024-06-13 14:09:51,415 - INFO - Added new session: New Demo Session
+2024-06-13 14:11:12,570 - INFO - VotingManager initialized with voting_method: YesNoLabel
+2024-06-13 14:11:12,571 - INFO - Topic initialized with UUID: dd998479-6040-4011-9950-312ce00efc97
+2024-06-13 14:11:12,573 - INFO - ConversableAgentParticipant initialized with model: gpt-3.5-turbo
+2024-06-13 14:11:12,574 - INFO - Loading config from: /Users/evan/Documents/GitHub/notebooks/coding/ciwa/config/OAI_CONFIG_LIST.json
+2024-06-13 14:11:12,596 - WARNING - The API key specified is not a valid OpenAI format; it won't work with the OpenAI-hosted model.
+2024-06-13 14:11:12,597 - INFO - Session initialized with UUID: 4d44df9c-ebc6-4030-bd1b-9924ecc76e88
+2024-06-13 14:11:12,597 - INFO - Session topics: ['What are some interesting AI challenges?']
+2024-06-13 14:11:12,598 - INFO - Added new session: New Demo Session
+2024-06-13 14:18:53,476 - INFO - Running session 9b7de2fa-2bbb-4cdb-a105-412d432c73cd.
+2024-06-13 14:18:53,488 - INFO - Submission response received: {'submission': {'content': 'nxwdyftzuh'}}
+2024-06-13 14:18:53,497 - INFO - Submission 9a4dd94b-9a48-4bd7-b1ce-111af3e1b3c2 added to Topic What is a good topic to test this on? with UUID: 1e433a18-d460-4042-a205-1c3f59dfb439
+2024-06-13 14:18:53,498 - INFO - TIMING: Submission 9a4dd94b-9a48-4bd7-b1ce-111af3e1b3c2 generated by LLMAgentParticipant in 0.02 seconds
+2024-06-13 14:18:53,499 - INFO - Submission response received: {'submission': {'content': 'bzlcgvaefg'}}
+2024-06-13 14:18:53,500 - INFO - Submission 2e6a3ddf-d14f-4d8a-9491-b3a51c06ad20 added to Topic What is a good topic to test this on? with UUID: 1e433a18-d460-4042-a205-1c3f59dfb439
+2024-06-13 14:18:53,500 - INFO - TIMING: Submission 2e6a3ddf-d14f-4d8a-9491-b3a51c06ad20 generated by LLMAgentParticipant in 0.02 seconds
+2024-06-13 14:18:53,501 - INFO - Submission response received: {'submission': {'content': 'ysyenwzrhx'}}
+2024-06-13 14:18:53,501 - INFO - Submission d713eb7b-e233-4cc6-9ce3-d03353a05548 added to Topic What is a good topic to test this on? with UUID: 1e433a18-d460-4042-a205-1c3f59dfb439
+2024-06-13 14:18:53,501 - INFO - TIMING: Submission d713eb7b-e233-4cc6-9ce3-d03353a05548 generated by LLMAgentParticipant in 0.02 seconds
+2024-06-13 14:18:53,502 - INFO - Submission response received: {'submission': {'content': 'bdivpaywhd'}}
+2024-06-13 14:18:53,503 - INFO - Submission 55ca5f6e-4523-4aaf-bc74-f17b9377ed20 added to Topic What is a good topic to test this on? with UUID: 1e433a18-d460-4042-a205-1c3f59dfb439
+2024-06-13 14:18:53,503 - INFO - TIMING: Submission 55ca5f6e-4523-4aaf-bc74-f17b9377ed20 generated by LLMAgentParticipant in 0.02 seconds
+2024-06-13 14:18:53,504 - INFO - Submission response received: {'submission': {'content': 'strwmsmavo'}}
+2024-06-13 14:18:53,504 - INFO - Submission c9c5375a-7ba0-4500-bfb9-b5db808f8503 added to Topic What is a good topic to test this on? with UUID: 1e433a18-d460-4042-a205-1c3f59dfb439
+2024-06-13 14:18:53,505 - INFO - TIMING: Submission c9c5375a-7ba0-4500-bfb9-b5db808f8503 generated by LLMAgentParticipant in 0.02 seconds
+2024-06-13 14:18:53,505 - INFO - All submissions gathered.
+2024-06-13 14:18:53,506 - INFO - Collecting votes on topics.
+2024-06-13 14:18:53,507 - INFO - Collecting compare votes for submissions on topic 1e433a18-d460-4042-a205-1c3f59dfb439 from participants.
+2024-06-13 14:18:53,512 - INFO - Vote response received: {'vote': [2, 5, 1, 3, 4]}
+2024-06-13 14:18:53,512 - INFO - LLMAgentParticipant bbc31e01-6d62-46be-83d1-88dfefa4da03 voted comparely on submissions ['9a4dd94b-9a48-4bd7-b1ce-111af3e1b3c2', '2e6a3ddf-d14f-4d8a-9491-b3a51c06ad20', 'd713eb7b-e233-4cc6-9ce3-d03353a05548', '55ca5f6e-4523-4aaf-bc74-f17b9377ed20', 'c9c5375a-7ba0-4500-bfb9-b5db808f8503']
+2024-06-13 14:18:53,513 - INFO - Compare vote for topic 1e433a18-d460-4042-a205-1c3f59dfb439 from participant bbc31e01-6d62-46be-83d1-88dfefa4da03 added to results.
+2024-06-13 14:18:53,516 - INFO - TIMING: Votes collected for topic 'What is a good topic to test this on?' in 0.01 seconds
+2024-06-13 14:18:53,517 - INFO - Gathering results from all topics.
+2024-06-13 14:18:53,519 - INFO - Processing votes for topic 1e433a18-d460-4042-a205-1c3f59dfb439.
+2024-06-13 14:18:53,520 - INFO - Session 9b7de2fa-2bbb-4cdb-a105-412d432c73cd completed.
+2024-06-13 14:18:53,523 - INFO - Results saved to Session_9b7de2fa-2bbb-4cdb-a105-412d432c73cd_results.json
+2024-06-13 14:18:53,523 - INFO - TIMING: Total elapsed time for session 9b7de2fa-2bbb-4cdb-a105-412d432c73cd: 0.05 seconds
+2024-06-13 14:26:41,400 - INFO - VotingManager initialized with voting_method: RankingCompare
+2024-06-13 14:26:41,401 - INFO - Topic initialized with UUID: 3194918a-c7a1-44b9-8708-70a27f1674aa
+2024-06-13 14:26:41,406 - INFO - LLMAgentParticipant initialized with model: gpt-3.5-turbo
+2024-06-13 14:26:41,406 - INFO - Session initialized with UUID: 3016cb31-8910-4ecb-9ec2-5764965680bd
+2024-06-13 14:26:41,407 - INFO - Session topics: ['What is a good topic to test this on?']
+2024-06-13 14:26:41,407 - INFO - Process initialized with default configurations.
+2024-06-13 14:26:45,765 - INFO - VotingManager initialized with voting_method: YesNoLabel
+2024-06-13 14:26:45,766 - INFO - Topic initialized with UUID: acc60a4c-1fb7-4616-ab00-351f865057e3
+2024-06-13 14:26:45,771 - INFO - ConversableAgentParticipant initialized with model: gpt-3.5-turbo
+2024-06-13 14:26:45,771 - INFO - Loading config from: /Users/evan/Documents/GitHub/notebooks/coding/ciwa/config/OAI_CONFIG_LIST.json
+2024-06-13 14:26:45,792 - WARNING - The API key specified is not a valid OpenAI format; it won't work with the OpenAI-hosted model.
+2024-06-13 14:26:45,793 - INFO - Session initialized with UUID: c940c200-4cee-4e9d-8985-9b7ee5fce0bb
+2024-06-13 14:26:45,794 - INFO - Session topics: ['What are some interesting AI challenges?']
+2024-06-13 14:26:45,794 - INFO - Added new session: New Demo Session

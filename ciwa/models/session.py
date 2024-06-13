@@ -20,7 +20,7 @@ class Session(Identifiable):
 
     def __init__(
         self,
-        process: "Process",
+        process: Optional["Process"] = None,
         topics_config: List[Dict[str, Any]] = [],
         default_topic_settings: Dict[str, Any] = {},
         participants_config: List[Dict[str, Any]] = [],
@@ -29,7 +29,7 @@ class Session(Identifiable):
         **kwargs,
     ) -> None:
         super().__init__()
-        self.process: "Process" = process
+        self.process: Optional["Process"] = process
         self.name: str = kwargs.get("name", "Session")
         self.description: str = kwargs.get("description", "A Session.")
         self.is_complete: bool = False
@@ -72,6 +72,29 @@ class Session(Identifiable):
         Add a participant to the session.
         """
         self.participants.append(participant)
+
+    def add_participant(self, participant_config: Dict[str, Any]) -> None:
+        """
+        Add a participant from a config dict to the session.
+        """
+
+        new_participant = ParticipantFactory.create_participant(**participant_config)
+
+        self.participants.append(new_participant)
+
+        logging.info(f"Added new participant: {new_participant.uuid}")
+
+    def add_topic(
+        self, topic_config: Dict[str, Any], default_topic_settings: Dict[str, Any] = {}
+    ) -> None:
+
+        new_topic = TopicFactory.create_topic(
+            session=self, **{**default_topic_settings, **topic_config}
+        )
+
+        self.topics.append(new_topic)
+
+        logging.info(f"Added new topic: {new_topic.title}")
 
     async def gather_submissions(self) -> None:
         """
@@ -208,7 +231,7 @@ class Session(Identifiable):
 
 class SessionFactory:
     @staticmethod
-    def create_session(process: "Process", **kwargs) -> Session:
+    def create_session(process: "Process" = None, **kwargs) -> Session:
         """
         Create a Session instance with flexible parameter input.
 
@@ -228,14 +251,17 @@ class SessionFactory:
         description = kwargs.pop("description", "No description provided.")
         topics_config = kwargs.pop("topics", [])
         session_default_topic_settings = kwargs.pop("default_topic_settings", {})
-        process_default_topic_settings = process.default_session_settings.get(
-            "default_topic_settings", {}
-        )
-        # Merge process default topic settings with session default topic settings
-        default_topic_settings = {
-            **process_default_topic_settings,
-            **session_default_topic_settings,
-        }
+        if process:
+            process_default_topic_settings = process.default_session_settings.get(
+                "default_topic_settings", {}
+            )
+            # Merge process default topic settings with session default topic settings
+            default_topic_settings = {
+                **process_default_topic_settings,
+                **session_default_topic_settings,
+            }
+        else:
+            default_topic_settings = session_default_topic_settings
 
         participant_configs = kwargs.pop("participants", [])
 

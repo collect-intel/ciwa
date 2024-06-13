@@ -33,17 +33,14 @@ class ParticipantFactory:
             return LLMAgentParticipant(**kwargs)
         elif type == "ConversableAgentParticipant":
             model = kwargs.pop("model")
-            prompt_template = kwargs.pop("prompt_template")
-            if not model or not prompt_template:
+            if not model:
                 logging.error(
-                    "Model or prompt_template not provided for ConversableAgentParticipant creation."
+                    "Model not provided for ConversableAgentParticipant creation."
                 )
                 raise ValueError(
-                    "Model and prompt template must be provided for ConversableAgentParticipant."
+                    "Model must be provided for ConversableAgentParticipant."
                 )
-            return ConversableAgentParticipant(
-                model=model, prompt_template=prompt_template, **kwargs
-            )
+            return ConversableAgentParticipant(model=model, **kwargs)
         else:
             logging.error(f"Unsupported participant type: {type}")
             raise ValueError(f"Participant type {type} is not supported.")
