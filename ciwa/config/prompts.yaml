@@ -1,4 +1,4 @@
-# filename: ciwa/config/prompts.yaml
+# config/prompts.yaml
 
 LLMAgentParticipant:
   system_message: "Welcome to the {process_name}. This is a {process_description}."

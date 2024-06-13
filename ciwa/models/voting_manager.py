@@ -1,3 +1,5 @@
+# models/voting_manager.py
+
 import asyncio
 import logging
 from typing import List, Type, Dict, Any

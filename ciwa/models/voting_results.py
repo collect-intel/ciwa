@@ -1,3 +1,5 @@
+# models/voting_results.py
+
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Union
 import datetime
