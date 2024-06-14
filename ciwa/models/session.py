@@ -43,7 +43,7 @@ class Session(Identifiable):
         self.max_concurrent: int = max_concurrent
         self.max_subs_per_topic: int = max_subs_per_topic
         self.results: Dict[str, Any] = {}
-        self.save_results: bool = save_results
+        self.do_save_results: bool = save_results
         logging.info(f"Session initialized with UUID: {self.uuid}")
         logging.info(f"Session topics: {[topic.title for topic in self.topics]}")
 
@@ -162,7 +162,7 @@ class Session(Identifiable):
         """
         self.is_complete = True
         logging.info(f"Session {self.uuid} completed.")
-        if self.save_results:
+        if self.do_save_results:
             self.save_results()
 
     async def collect_all_votes(self) -> None:

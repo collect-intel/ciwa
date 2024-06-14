@@ -1,7 +1,5 @@
-# utils/notebook_utils.py
-
 from ciwa.models.session import Session
-from IPython.display import display, JSON
+from IPython.display import display, JSON, display_markdown
 import matplotlib.pyplot as plt
 import networkx as nx
 
@@ -41,11 +39,29 @@ def visualize_session(session: Session) -> None:
     plt.show()
 
 
-def display_results(session: Session) -> None:
+def display_results(session: Session, aggregated_only: bool = False) -> None:
     """
     Display the session results in a JSON format in the Jupyter notebook.
 
     Args:
         session (Session): The session whose results are to be displayed.
+        aggregated_only (bool): If True, display only the text of submissions and their aggregated_results 'result' value.
     """
-    display(JSON(session.results))
+    if aggregated_only:
+        for topic in session.results["topics"]:
+            display_markdown(
+                f"### **Topic**: {topic['title']}\n\n**Description**: {topic['description']}",
+                raw=True,
+            )
+            submissions = {sub["uuid"]: sub["content"] for sub in topic["submissions"]}
+
+            for submission_result in topic["voting_results"]["aggregated_results"][
+                "submissions"
+            ]:
+                submission_uuid = submission_result["uuid"]
+                display_markdown(
+                    f"- **Submission UUID**: {submission_uuid}\n   - **Submission**: {submissions[submission_uuid]}\n   - **{topic["voting_method"]} Result**: {submission_result['result']}",
+                    raw=True,
+                )
+    else:
+        display(JSON(session.results))

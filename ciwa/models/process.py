@@ -169,17 +169,20 @@ class Process(Identifiable):
             "sessions": [session.to_json() for session in self.completed_sessions],
         }
 
+    def run(self) -> None:
+        """
+        Run the process.
+        """
+        logging.info(f"Running process {self.name}...")
+        asyncio.run(self.run_all_sessions())
+        self.conclude_process()
 
-async def main() -> None:
+
+def main() -> None:
     config_manager = ConfigManager(config_path="ciwa/config/settings.yaml")
     process = ProcessFactory.create_process()
-
-    logging.info(f"Process {process.name} initialized with UUID: {process.uuid}")
-    logging.info(f"Process sessions: {[s.uuid for s in process.pending_sessions]}")
-    await process.run_all_sessions()
-
-    process.conclude_process()
+    process.run()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

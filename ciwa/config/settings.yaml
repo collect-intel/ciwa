@@ -11,7 +11,7 @@ process:
     - name: "Default Owner"
       email: "evan@cip.org"
   default_session_settings:
-    max_subs_per_topic: 5 # max submissions from each participant per topic
+    max_subs_per_topic: 2 # max submissions from each participant per topic
     max_concurrent: 100 # max concurrent requests for submissions
     default_topic_settings:
       voting_method:
@@ -19,31 +19,31 @@ process:
     participants:
       - type: "LLMAgentParticipant"
         model: "gpt-3.5-turbo"
-        temperature: 0.5
+        temperature: 2.0
         cache_seed: null
       - type: "LLMAgentParticipant"
         model: "gpt-3.5-turbo"
-        temperature: 0.4
+        temperature: 2.0
         cache_seed: null
       - type: "LLMAgentParticipant"
         model: "gpt-3.5-turbo"
-        temperature: 0.3
+        temperature: 2.0
         cache_seed: null
       - type: "LLMAgentParticipant"
         model: "gpt-3.5-turbo"
-        temperature: 0.2
+        temperature: 2.0
         cache_seed: null
       - type: "LLMAgentParticipant"
         model: "gpt-3.5-turbo"
-        temperature: 0.6
+        temperature: 2.0
         cache_seed: null
       - type: "LLMAgentParticipant"
         model: "gpt-3.5-turbo"
-        temperature: 0.7
+        temperature: 2.0
         cache_seed: null
       - type: "LLMAgentParticipant"
         model: "gpt-3.5-turbo"
-        temperature: 0.8
+        temperature: 2.0
         cache_seed: null
   sessions:
     - name: "Demo Session"
@@ -51,19 +51,9 @@ process:
       next_session: "Demo Session" # re-run the same session
       default_topic_settings:
         voting_method:
-          type: "YesNoLabel"
+          type: "EnumLabel"
       topics:
-        - title: "What is a good topic to test this on?"
-          description: "Give a submission for what would be a good topic to test this on."
-        - title: "What are 3 topics that would be good to test this on?"
-          description: "Give a submission with 3 different topics, enumerated A. B. C. for what would be good to test this on."
+        - title: "What are possible future outcomes from AGI that people might like?"
+          description: "Describe a realistic future outcome from AGI that is beneficial for humanity generally."
           voting_method:
-            type: "EnumLabel" 
-            enum_values: ["A", "B", "C"]
-        - title: "What is a good starting move for Chess?"
-          description: "Give a submission for what would be a good starting move for Chess, in Standard Algebraic Notation (SAN)."
-          voting_method:
-            type: "ScoreCompare"
-            start_value: 1
-            end_value: 10
-            increment_value: 1
+            type: "RankingCompare"
