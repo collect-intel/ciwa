@@ -8,8 +8,8 @@ import os
 
 
 class ConversableAgentParticipant(LLMAgentParticipant):
-    def __init__(self, model: str, prompt_template: str, **kwargs) -> None:
-        super().__init__(model, prompt_template, **kwargs)
+    def __init__(self, model: str, **kwargs) -> None:
+        super().__init__(model, **kwargs)
         self.agent: "ConversableAgent" = self._init_agent(**kwargs)
 
     def _init_agent(self, **kwargs) -> "ConversableAgent":
@@ -30,6 +30,10 @@ class ConversableAgentParticipant(LLMAgentParticipant):
             if key in kwargs
         }
 
+        print(
+            f"Creating ConversableAgent with config: {config_list} and kwargs: {agent_kwargs}"
+        )
+
         return autogen.ConversableAgent(
             name="assistant",
             llm_config={"config_list": config_list, **agent_kwargs},
@@ -44,7 +48,13 @@ class ConversableAgentParticipant(LLMAgentParticipant):
         }
         config_list = autogen.config_list_from_json(env_or_file=config_path)
         config_list = autogen.filter_config(config_list, filter_dict)
-        assert len(config_list) == 1
+        if len(config_list) != 1:
+            logging.error(
+                f"Expected exactly one config for model {self.model}, but found {len(config_list)}"
+            )
+            raise ValueError(
+                f"Expected exactly one config for model {self.model}, but found {len(config_list)}"
+            )
         return config_list
 
     async def send_prompt(self, prompt: str, response_schema: Dict[str, Any]) -> str:

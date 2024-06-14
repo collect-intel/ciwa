@@ -2,3 +2,7 @@
 *.pyc
 *.DS_Store
 ciwa/config/OAI_CONFIG_LIST.json
+/notebooks/.ipynb_checkpoints
+/notebooks/Session*.json
+/notebooks/*.log
+/notebooks/.cache

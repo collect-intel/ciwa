@@ -20,16 +20,17 @@ class Session(Identifiable):
 
     def __init__(
         self,
-        process: "Process",
+        process: Optional["Process"] = None,
         topics_config: List[Dict[str, Any]] = [],
         default_topic_settings: Dict[str, Any] = {},
         participants_config: List[Dict[str, Any]] = [],
         max_subs_per_topic: int = 1,
         max_concurrent: int = 50,
+        save_results: bool = True,
         **kwargs,
     ) -> None:
         super().__init__()
-        self.process: "Process" = process
+        self.process: Optional["Process"] = process
         self.name: str = kwargs.get("name", "Session")
         self.description: str = kwargs.get("description", "A Session.")
         self.is_complete: bool = False
@@ -42,6 +43,7 @@ class Session(Identifiable):
         self.max_concurrent: int = max_concurrent
         self.max_subs_per_topic: int = max_subs_per_topic
         self.results: Dict[str, Any] = {}
+        self.do_save_results: bool = save_results
         logging.info(f"Session initialized with UUID: {self.uuid}")
         logging.info(f"Session topics: {[topic.title for topic in self.topics]}")
 
@@ -72,6 +74,36 @@ class Session(Identifiable):
         Add a participant to the session.
         """
         self.participants.append(participant)
+
+    def add_participant(self, participant_config: Dict[str, Any]) -> None:
+        """
+        Add a participant from a config dict to the session.
+        """
+
+        new_participant = ParticipantFactory.create_participant(**participant_config)
+
+        self.participants.append(new_participant)
+
+        logging.info(f"Added new participant: {new_participant.uuid}")
+
+    def add_participants(self, participants_config: List[Dict[str, Any]]) -> None:
+        """
+        Add multiple participants to the session.
+        """
+        for participant_config in participants_config:
+            self.add_participant(participant_config)
+
+    def add_topic(
+        self, topic_config: Dict[str, Any], default_topic_settings: Dict[str, Any] = {}
+    ) -> None:
+
+        new_topic = TopicFactory.create_topic(
+            session=self, **{**default_topic_settings, **topic_config}
+        )
+
+        self.topics.append(new_topic)
+
+        logging.info(f"Added new topic: {new_topic.title}")
 
     async def gather_submissions(self) -> None:
         """
@@ -130,7 +162,8 @@ class Session(Identifiable):
         """
         self.is_complete = True
         logging.info(f"Session {self.uuid} completed.")
-        self.save_results()
+        if self.do_save_results:
+            self.save_results()
 
     async def collect_all_votes(self) -> None:
         logging.info("Collecting votes on topics.")
@@ -208,7 +241,7 @@ class Session(Identifiable):
 
 class SessionFactory:
     @staticmethod
-    def create_session(process: "Process", **kwargs) -> Session:
+    def create_session(process: "Process" = None, **kwargs) -> Session:
         """
         Create a Session instance with flexible parameter input.
 
@@ -228,14 +261,17 @@ class SessionFactory:
         description = kwargs.pop("description", "No description provided.")
         topics_config = kwargs.pop("topics", [])
         session_default_topic_settings = kwargs.pop("default_topic_settings", {})
-        process_default_topic_settings = process.default_session_settings.get(
-            "default_topic_settings", {}
-        )
-        # Merge process default topic settings with session default topic settings
-        default_topic_settings = {
-            **process_default_topic_settings,
-            **session_default_topic_settings,
-        }
+        if process:
+            process_default_topic_settings = process.default_session_settings.get(
+                "default_topic_settings", {}
+            )
+            # Merge process default topic settings with session default topic settings
+            default_topic_settings = {
+                **process_default_topic_settings,
+                **session_default_topic_settings,
+            }
+        else:
+            default_topic_settings = session_default_topic_settings
 
         participant_configs = kwargs.pop("participants", [])
 

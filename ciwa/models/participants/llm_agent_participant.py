@@ -22,7 +22,7 @@ class LLMAgentParticipant(Participant):
 
     DEFAULT_MAX_RESPONSE_ATTEMPTS = 3
 
-    def __init__(self, model: str, prompt_template: str, **kwargs):
+    def __init__(self, model: str, **kwargs):
         """
         Initializes a new instance of LLMAgentParticipant with a unique id.
         """
@@ -31,11 +31,8 @@ class LLMAgentParticipant(Participant):
         self.max_response_attempts = kwargs.get(
             "max_response_attempts", self.DEFAULT_MAX_RESPONSE_ATTEMPTS
         )
-        self.prompt_template = prompt_template
         self.prompts = prompt_loader.get_prompts(self.__class__)
-        logging.info(
-            f"{self.__class__.__name__} initialized with model: {self.model} and prompt_template: {self.prompt_template}"
-        )
+        logging.info(f"{self.__class__.__name__} initialized with model: {self.model}")
 
     async def generate_submissions(
         self, topic: Topic, num_submissions: int
@@ -176,13 +173,12 @@ class LLMAgentParticipant(Participant):
             "properties": {
                 "uuid": {"type": "string"},
                 "model": {"type": "string"},
-                "prompt_template": {"type": "string"},
                 "type": {
                     "type": "string",
-                    "const": f"{self.__class__.__name__}",
+                    "const": self.type,
                 },
             },
-            "required": ["uuid", "model", "prompt_template"],
+            "required": ["uuid", "model"],
         }
 
     def to_json(self) -> dict:
@@ -192,7 +188,6 @@ class LLMAgentParticipant(Participant):
         return {
             "uuid": str(self.uuid),
             "model": self.model,
-            "prompt_template": self.prompt_template,
             "type": f"{self.__class__.__name__}",
         }
 

@@ -4,7 +4,10 @@ import yaml
 import os
 import inspect
 
-PROMPTS_FILE = "ciwa/config/prompts.yaml"
+# Get the absolute path to the prompts.yaml file
+PROMPTS_FILE = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "config", "prompts.yaml"
+)
 
 
 def load_prompts(yaml_file: str = PROMPTS_FILE) -> dict:
