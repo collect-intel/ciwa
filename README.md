@@ -144,8 +144,29 @@ Logging output is saved by default to `output.log`.
 2. **Initialize Process**: Create a process using the `ProcessFactory`.
 3. **Run Sessions**: Use the `Session` class to manage and run discussion sessions.
 
+Alternatively, explore using CIwA in a Python Notebook by going through any of the examples in `notebooks`.
 
-## Example
+### Using Jupyter Notebooks
+Use Jupyter to run any of the example notebooks provided.
+
+1. **Install Jupyter Notebook**:
+
+    ```bash
+    pip install jupyter
+    ```
+
+2. **Run Jupyter Notebook**:
+
+    ```bash
+    jupyter notebook
+    ```
+
+3. **Open the Notebook**:
+
+    This will open a new tab in your default web browser. Open the `notebooks` folder where the `.ipynb` files are located and click on the notebook you want to open.
+
+
+## Code Example
 
 Here is a basic usage example:
 
