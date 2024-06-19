@@ -15,6 +15,13 @@ class VotingMethod(ABC):
     def __init__(self) -> None:
         self.vote_prompt = prompt_loader.get_prompts(self.__class__)["vote_prompt"]
 
+    @property
+    def type(self) -> str:
+        """
+        Return the class name as a string.
+        """
+        return self.__class__.__name__
+
     @abstractmethod
     def process_votes(
         self, voting_results: VotingResults, submission_ids: List[str]

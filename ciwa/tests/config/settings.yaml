@@ -1,0 +1,20 @@
+process:
+  name: "Test CIwA Process from file"
+  description: "A test process for CIwA from file"
+  default_session_settings:
+    max_subs_per_topic: 5
+    max_concurrent: 100
+    default_topic_settings:
+      voting_method:
+        type: "RankingCompare"
+    participants:
+      - type: "LLMAgentParticipant"
+        model: "gpt-3.5-turbo"
+        temperature: 0.5
+        prompt_template: "default_template"
+  sessions:
+    - name: "Test Session"
+      description: "A test session for CIwA"
+      topics:
+        - title: "Test Topic"
+          description: "Description of test topic"

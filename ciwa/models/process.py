@@ -11,20 +11,16 @@ from ciwa.models.identifiable import Identifiable
 
 class ProcessFactory:
     @staticmethod
-    def create_process(**kwargs) -> "Process":
+    def create_process(config: Dict[str, Any]) -> "Process":
         """
         Create a Process instance from configurations and runtime parameters.
 
         Args:
-            **kwargs: Arbitrary keyword arguments which can override the default configurations.
+            config (Dict[str, Any]): Configuration dictionary for the process.
 
         Returns:
             Process: An instance of Process fully configured and ready for use.
         """
-        # Load default configuration and update with any provided overrides
-        config = ConfigManager().get_config("process")
-        config.update(kwargs)  # Override defaults with any provided kwargs
-
         # Handle nested configurations for sessions
         default_session_settings = config.pop("default_session_settings", {})
         session_configs = config.pop("sessions", [])
@@ -180,7 +176,8 @@ class Process(Identifiable):
 
 def main() -> None:
     config_manager = ConfigManager(config_path="ciwa/config/settings.yaml")
-    process = ProcessFactory.create_process()
+    process_config = config_manager.get_config("process")
+    process = ProcessFactory.create_process(config=process_config)
     process.run()
 
 

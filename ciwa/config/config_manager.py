@@ -5,18 +5,13 @@ from typing import Dict, Any
 
 
 class ConfigManager:
-    _instance = None
-
-    def __new__(cls, config_path=None, config=None, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(ConfigManager, cls).__new__(cls)
-            if config_path:
-                cls._instance._init_from_file(config_path)
-            elif config:
-                cls._instance._init_from_dict(config)
-            else:
-                cls._instance._init_from_kwargs(**kwargs)
-        return cls._instance
+    def __init__(self, config_path=None, config=None, **kwargs):
+        if config_path:
+            self._init_from_file(config_path)
+        elif config:
+            self._init_from_dict(config)
+        else:
+            self._init_from_kwargs(**kwargs)
 
     def _init_from_file(self, config_path):
         with open(config_path, "r") as file:

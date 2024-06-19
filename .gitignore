@@ -6,3 +6,8 @@ ciwa/config/OAI_CONFIG_LIST.json
 /notebooks/Session*.json
 /notebooks/*.log
 /notebooks/.cache
+venv/
+get_project_context.py
+output.log
+Session_*_results.json
+combined_python_files.txt
