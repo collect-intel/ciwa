@@ -1,5 +1,10 @@
 # models/submission.py
 
+"""
+This module provides the Submission class, representing a submission made by a participant
+on a particular topic.
+"""
+
 from typing import TYPE_CHECKING
 import datetime
 from ciwa.models.identifiable import Identifiable
@@ -30,7 +35,10 @@ class Submission(Identifiable):
         self.created_at = datetime.datetime.now()
 
     def __str__(self) -> str:
-        return f"Submission {self.uuid} by {self.participant.identifier} on '{self.topic.title}' at {self.created_at}: {self.content[:50]}..."
+        return (
+            f"Submission {self.uuid} by {self.participant.identifier} on "
+            f"'{self.topic.title}' at {self.created_at}: {self.content[:50]}..."
+        )
 
     @staticmethod
     def get_object_schema() -> dict:
@@ -62,7 +70,8 @@ class Submission(Identifiable):
     @staticmethod
     def get_response_schema() -> dict:
         """
-        Returns the JSON schema to represent the properties a Participant is expected to respond with to create a Submission.
+        Returns the JSON schema to represent the properties a Participant is expected to
+        respond with to create a Submission.
         """
         return {
             "type": "object",

@@ -1,7 +1,12 @@
 # models/voting_results.py
 
+"""
+This module provides the abstract base class VotingResults and its concrete implementations,
+LabelVotingResults and CompareVotingResults, for managing voting results.
+"""
+
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any
 import datetime
 
 
@@ -29,22 +34,20 @@ class VotingResults(ABC):
             participant_id (str): The ID of the participant who voted.
             vote_data (Any): The raw vote data from the participant.
         """
-        pass
 
     @abstractmethod
     def process_votes(
         self, voting_method: "VotingMethod", submission_ids: List[str]
     ) -> None:
         """
-        Process the raw votes using the provided voting voting_method to produce aggregated results.
-                Requires list of submission.uuid's to validate votes against and account for any submissions
-                that didn't receive any votes.
+        Process the raw votes using the provided voting method to produce aggregated results.
+        Requires a list of submission UUIDs to validate votes against and account for any
+        submissions that didn't receive any votes.
 
         Args:
-            voting_method (VotingMethod): The voting voting_method to use for processing votes.
-            submission_ids (List[str]): List of submission.uuid's that were available for voting on.
+            voting_method (VotingMethod): The voting method to use for processing votes.
+            submission_ids (List[str]): List of submission UUIDs that were available for voting on.
         """
-        pass
 
     @abstractmethod
     def to_json(self) -> Dict[str, Any]:
@@ -54,7 +57,6 @@ class VotingResults(ABC):
         Returns:
             Dict[str, Any]: JSON-compatible representation of the voting results.
         """
-        pass
 
 
 class LabelVotingResults(VotingResults):
@@ -63,7 +65,8 @@ class LabelVotingResults(VotingResults):
 
     Attributes:
         submissions (Dict[str, List[Dict[str, Any]]]):
-            Dict of key: submission.uuid, value: List of Dicts: (uuid: participant.uuid, vote: vote_json)
+            Dict of key: submission UUID, value: List of Dicts:
+                (uuid: participant UUID, vote: vote JSON)
     """
 
     def __init__(self) -> None:
@@ -96,11 +99,11 @@ class LabelVotingResults(VotingResults):
         self, voting_method: "LabelVotingMethod", submission_ids: List[str]
     ) -> None:
         """
-        Process the raw votes using the provided label voting voting_method to produce aggregated results.
+        Process the raw votes using the provided label voting method to produce aggregated results.
 
         Args:
-            voting_method (LabelVotingMethod): The voting voting_method to use for processing votes.
-            submission_ids (List[str]): List of submission.uuid's made available for voting.
+            voting_method (LabelVotingMethod): The voting method to use for processing votes.
+            submission_ids (List[str]): List of submission UUIDs made available for voting.
         """
         self.aggregated_results = voting_method.process_votes(self, submission_ids)
 
@@ -147,9 +150,6 @@ class CompareVotingResults(VotingResults):
         submissions (List[str]): List of submission IDs voted on.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
-
     def add_vote(self, participant_id: str, vote_data: Any) -> None:
         """
         Add a participant's compare vote to the results.
@@ -167,11 +167,12 @@ class CompareVotingResults(VotingResults):
         self, voting_method: "CompareVotingMethod", submission_ids: List[str]
     ) -> None:
         """
-        Process the raw votes using the provided compare voting voting_method to produce aggregated results.
+        Process the raw votes using the provided compare voting method to produce
+        ggregated results.
 
         Args:
-            voting_method (CompareVotingMethod): The voting voting_method to use for processing votes.
-            submission_ids (List[str]): List of submission.uuid's made available for voting.
+            voting_method (CompareVotingMethod): The voting method to use for processing votes.
+            submission_ids (List[str]): List of submission UUIDs made available for voting.
         """
         self.aggregated_results = voting_method.process_votes(self, submission_ids)
 

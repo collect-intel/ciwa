@@ -5,7 +5,6 @@ from ciwa.models.voting_methods.voting_method import CompareVotingMethod
 from ciwa.models.schema_factory import SchemaFactory
 from ciwa.models.voting_results import VotingResults
 
-
 ROUND_NDIGITS = 3
 
 

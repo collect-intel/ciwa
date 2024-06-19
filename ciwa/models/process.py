@@ -1,5 +1,9 @@
 # models/process.py
 
+"""
+This module defines the ProcessFactory and Process classes for managing and running processes.
+"""
+
 import asyncio
 import logging
 from collections import deque
@@ -10,6 +14,10 @@ from ciwa.models.identifiable import Identifiable
 
 
 class ProcessFactory:
+    """
+    Factory class for creating Process instances.
+    """
+
     @staticmethod
     def create_process(config: Dict[str, Any]) -> "Process":
         """
@@ -34,12 +42,25 @@ class ProcessFactory:
 
 
 class Process(Identifiable):
+    """
+    Represents a process that manages and runs sessions.
+
+    Attributes:
+        name (str): The name of the process.
+        description (Optional[str]): A description of the process.
+        current_session (Optional["Session"]): The current session being run.
+        completed_sessions (List["Session"]): List of completed sessions.
+        owners (List["Owner"]): List of owners of the process.
+        default_session_settings (Dict[str, Any]): Default settings for sessions.
+        pending_sessions (Deque["Session"]): Queue of pending sessions to be run.
+    """
+
     def __init__(
         self,
         name: str,
         description: Optional[str] = None,
-        session_configs: List[Dict[str, Any]] = [],
-        default_session_settings: Dict[str, Any] = {},
+        session_configs: Optional[List[Dict[str, Any]]] = None,
+        default_session_settings: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -48,9 +69,9 @@ class Process(Identifiable):
         self.current_session: Optional["Session"] = None
         self.completed_sessions: List["Session"] = []
         self.owners: List["Owner"] = []
-        self.default_session_settings: Dict[str, Any] = default_session_settings
+        self.default_session_settings: Dict[str, Any] = default_session_settings or {}
         self.pending_sessions: Deque["Session"] = self._init_sessions(
-            session_configs, default_session_settings
+            session_configs or [], self.default_session_settings
         )
 
     def _init_sessions(
@@ -58,6 +79,16 @@ class Process(Identifiable):
         session_configs: List[Dict[str, Any]],
         default_session_settings: Dict[str, Any],
     ) -> Deque["Session"]:
+        """
+        Initialize sessions from the given configurations and default settings.
+
+        Args:
+            session_configs (List[Dict[str, Any]]): Configurations for the sessions.
+            default_session_settings (Dict[str, Any]): Default settings for the sessions.
+
+        Returns:
+            Deque["Session"]: A deque of initialized sessions.
+        """
         sessions = deque(
             SessionFactory.create_session(
                 process=self, **{**default_session_settings, **session_config}
@@ -75,7 +106,7 @@ class Process(Identifiable):
             owner (Owner): The owner to add.
         """
         self.owners.append(owner)
-        logging.info(f"Owner {owner.name} added to process.")
+        logging.info("Owner %s added to process.", owner.name)
 
     def update_process(self, updates: Dict[str, Any]) -> None:
         """
@@ -87,23 +118,36 @@ class Process(Identifiable):
         for key, value in updates.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-                logging.info(f"Updated {key} to {value}")
+                logging.info("Updated %s to %s", key, value)
             else:
-                logging.error(f"Attempted to update non-existing attribute {key}")
+                logging.error("Attempted to update non-existing attribute %s", key)
 
     def add_session(self, session_config: Dict[str, Any]) -> None:
+        """
+        Add a session to the process.
+
+        Args:
+            session_config (Dict[str, Any]): Configuration for the session to add.
+        """
         new_session = SessionFactory.create_session(process=self, **session_config)
         self.pending_sessions.append(new_session)
-        logging.info(f"Added new session: {new_session.name}")
+        logging.info("Added new session: %s", new_session.name)
 
     def update_session(self, session_id: str, updates: Dict[str, Any]) -> None:
+        """
+        Update a session's attributes.
+
+        Args:
+            session_id (str): The ID of the session to update.
+            updates (Dict[str, Any]): The attributes to update.
+        """
         for session in self.pending_sessions:
             if session.uuid == session_id:
                 for key, value in updates.items():
                     if hasattr(session, key):
                         setattr(session, key, value)
                         logging.info(
-                            f"Updated session {session_id}: set {key} to {value}"
+                            "Updated session %s: set %s to %s", session_id, key, value
                         )
                 break
 
@@ -169,12 +213,15 @@ class Process(Identifiable):
         """
         Run the process.
         """
-        logging.info(f"Running process {self.name}...")
+        logging.info("Running process %s...", self.name)
         asyncio.run(self.run_all_sessions())
         self.conclude_process()
 
 
 def main() -> None:
+    """
+    Main function to initialize and run the process based on the configuration.
+    """
     config_manager = ConfigManager(config_path="ciwa/config/settings.yaml")
     process_config = config_manager.get_config("process")
     process = ProcessFactory.create_process(config=process_config)

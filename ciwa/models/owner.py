@@ -1,10 +1,24 @@
 # models/owner.py
 
+"""
+This module defines the Owner class, representing an owner within the CIwA system.
+An owner can manage multiple processes and has a name and email associated with them.
+"""
+
 from typing import List
 from ciwa.models.identifiable import Identifiable
 
 
 class Owner(Identifiable):
+    """
+    Represents an owner within the CIwA system.
+
+    Attributes:
+        name (str): The name of the owner.
+        email (str): The email of the owner.
+        processes (List[Process]): The list of processes managed by the owner.
+    """
+
     def __init__(self, name: str, email: str) -> None:
         super().__init__()
         self.name: str = name

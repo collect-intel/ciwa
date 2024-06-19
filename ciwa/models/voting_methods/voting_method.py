@@ -36,26 +36,25 @@ class VotingMethod(ABC):
         Returns:
             Any: The result of the vote processing, specific to the voting_method.
         """
-        pass
 
     @abstractmethod
     def get_vote_schema(self, **kwargs) -> Dict[str, Any]:
         """
         Returns the JSON schema for the vote data.
         """
-        pass
 
     @abstractmethod
     def get_vote_prompt(self, **kwargs) -> str:
         """
         Returns a prompt for the vote.
         """
-        pass
 
     @staticmethod
     @abstractmethod
     def is_label() -> bool:
-        pass
+        """
+        Returns True if the voting method is a label voting method.
+        """
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__} Voting Method"
@@ -68,18 +67,14 @@ class LabelVotingMethod(VotingMethod, ABC):
     effectively applying a label to each Submission.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
-
     @staticmethod
     def is_label() -> bool:
         return True
 
-    @abstractmethod
-    def get_vote_schema(self) -> Dict[str, Any]:
-        pass
-
     def get_vote_prompt(self, submission: "Submission", **kwargs) -> str:
+        """
+        Returns a prompt to give the Participants to decide their vote.
+        """
         if isinstance(submission, Submission):
             return self.vote_prompt.format(
                 submission_content=submission.content, **kwargs
@@ -96,18 +91,14 @@ class CompareVotingMethod(VotingMethod, ABC):
     where votes are given on a set of Submissions by comparing them to each other.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
-
     @staticmethod
     def is_label() -> bool:
         return False
 
-    @abstractmethod
-    def get_vote_schema(self, num_submissions: int) -> Dict[str, Any]:
-        pass
-
     def get_vote_prompt(self, submissions: List["Submission"], **kwargs) -> str:
+        """
+        Returns a prompt to give the Participants to decide their vote.
+        """
         if isinstance(submissions, list):
             submissions_contents_str = ""
             for i, submission in enumerate(submissions):
