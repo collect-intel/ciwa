@@ -73,6 +73,7 @@ class Process(Identifiable):
         self.pending_sessions: Deque["Session"] = self._init_sessions(
             session_configs or [], self.default_session_settings
         )
+        logging.info("Process initialized.")
 
     def _init_sessions(
         self,
@@ -95,7 +96,6 @@ class Process(Identifiable):
             )
             for session_config in session_configs
         )
-        logging.info("Process initialized with default configurations.")
         return sessions
 
     def add_owner(self, owner: "Owner") -> None:

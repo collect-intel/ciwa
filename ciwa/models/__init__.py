@@ -3,11 +3,12 @@
 Models for CIwA.
 """
 
-from .submission import Submission
+from .identifiable import Identifiable
+from .process import Process, ProcessFactory
 from .session import Session, SessionFactory
 from .owner import Owner
 from .topic import Topic, TopicFactory
-from .identifiable import Identifiable
+from .submission import Submission
 from .voting_results import VotingResults, LabelVotingResults, CompareVotingResults
 from .voting_manager import VotingManagerFactory
 from .schema_factory import SchemaFactory
