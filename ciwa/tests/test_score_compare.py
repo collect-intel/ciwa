@@ -1,5 +1,7 @@
+# tests/test_score_compare.py
+
 import pytest
-from ciwa.models.voting_methods.score_compare import ScoreCompare
+from ciwa.models.voting_methods import ScoreCompare
 from ciwa.models.voting_results import CompareVotingResults
 from ciwa.tests.utils.model_utils import create_submission
 

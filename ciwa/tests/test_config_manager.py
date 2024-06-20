@@ -1,7 +1,7 @@
-# ciwa/tests/test_config_manager.py
+# tests/test_config_manager.py
 
 import pytest
-from ciwa.config.config_manager import ConfigManager
+from ciwa.config import ConfigManager
 
 
 def test_config_manager_init_from_file():

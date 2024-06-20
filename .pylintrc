@@ -1,0 +1,3 @@
+[MASTER]
+ignore=tests,config
+ignore-patterns=test_.*\.py,config_.*\.py,.*_utils.py

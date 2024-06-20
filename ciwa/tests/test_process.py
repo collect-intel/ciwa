@@ -1,7 +1,7 @@
 # ciwa/tests/test_process.py
 
 import pytest
-from ciwa.config.config_manager import ConfigManager
+from ciwa.config import ConfigManager
 from ciwa.models.process import ProcessFactory
 from ciwa.models.owner import Owner
 

@@ -2,7 +2,7 @@
 
 import pytest
 from ciwa.models.process import ProcessFactory
-from ciwa.config.config_manager import ConfigManager
+from ciwa.config import ConfigManager
 
 
 @pytest.fixture

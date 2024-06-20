@@ -2,13 +2,11 @@
 
 import pytest
 from ciwa.models.voting_results import CompareVotingResults
-from ciwa.models.voting_methods.voting_method import CompareVotingMethod
+from ciwa.models.voting_methods import CompareVotingMethod
 from ciwa.models.submission import Submission
-from ciwa.models.participants.participant_factory import ParticipantFactory
+from ciwa.models.participants import ParticipantFactory
 from ciwa.models.topic import TopicFactory
 from ciwa.models.session import Session
-import datetime
-
 from ciwa.tests.utils.model_utils import (
     create_session,
     create_topic,

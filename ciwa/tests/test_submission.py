@@ -2,10 +2,9 @@
 
 import pytest
 from ciwa.models.submission import Submission
-from ciwa.models.participants.participant_factory import ParticipantFactory
+from ciwa.models.participants import ParticipantFactory
 from ciwa.models.topic import TopicFactory
 from ciwa.models.session import Session
-
 from ciwa.tests.utils.model_utils import (
     create_session,
     create_topic,

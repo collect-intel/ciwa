@@ -1,10 +1,11 @@
-from ciwa.models.session import Session
+# utils/notebook_utils.py
+
 from IPython.display import display, JSON, display_markdown
 import matplotlib.pyplot as plt
 import networkx as nx
 
 
-def visualize_session(session: Session) -> None:
+def visualize_session(session: "Session") -> None:
     """
     Visualize the session's topics and submissions using a network graph.
 
@@ -39,7 +40,7 @@ def visualize_session(session: Session) -> None:
     plt.show()
 
 
-def display_results(session: Session, aggregated_only: bool = False) -> None:
+def display_results(session: "Session", aggregated_only: bool = False) -> None:
     """
     Display the session results in a JSON format in the Jupyter notebook.
 

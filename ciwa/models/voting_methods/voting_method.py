@@ -1,7 +1,11 @@
-# filename: ciwa/voting_methods/voting_method.py
+# models/voting_methods/voting_method.py
+"""
+This module contains abstract base classes for different voting methods
+used in the CIWA application.
+"""
 
 from abc import ABC, abstractmethod
-from typing import List, TypeVar, Any, Dict
+from typing import List, Any, Dict
 from ciwa.utils import prompt_loader
 from ciwa.models.submission import Submission
 from ciwa.models.voting_results import VotingResults
@@ -9,7 +13,7 @@ from ciwa.models.voting_results import VotingResults
 
 class VotingMethod(ABC):
     """
-    Abstract base class for voting voting methods.
+    Abstract base class for voting methods.
     """
 
     def __init__(self) -> None:
@@ -31,8 +35,10 @@ class VotingMethod(ABC):
 
         Args:
             voting_results (VotingResults): An object holding the voting results.
-            submission_ids (List[str]): List of submission.uuid's that were available for voting.
-                Allows aggregate results to return empty/none values for submissions that received no votes.
+            submission_ids (List[str]): List of submission.uuid's that were available
+                                        for voting. Allows aggregate results to return
+                                        empty/none values for submissions that received
+                                        no votes.
         Returns:
             Any: The result of the vote processing, specific to the voting_method.
         """
@@ -63,26 +69,27 @@ class VotingMethod(ABC):
 class LabelVotingMethod(VotingMethod, ABC):
     """
     Abstract VotingMethod class implementing a label voting rule,
-    where votes are given on Submissions independently without compare to other Submissions,
-    effectively applying a label to each Submission.
+    where votes are given on Submissions independently without
+    comparing to other Submissions, effectively applying a label
+    to each Submission.
     """
 
     @staticmethod
     def is_label() -> bool:
         return True
 
-    def get_vote_prompt(self, submission: "Submission", **kwargs) -> str:
+    def get_vote_prompt(self, submission: Submission, **kwargs) -> str:
         """
         Returns a prompt to give the Participants to decide their vote.
         """
+
         if isinstance(submission, Submission):
             return self.vote_prompt.format(
                 submission_content=submission.content, **kwargs
             )
-        else:
-            raise TypeError(
-                "get_vote_prompt() requires a single submission for label voting methods."
-            )
+        raise TypeError(
+            "get_vote_prompt() requires a single submission for label voting methods."
+        )
 
 
 class CompareVotingMethod(VotingMethod, ABC):
@@ -95,20 +102,18 @@ class CompareVotingMethod(VotingMethod, ABC):
     def is_label() -> bool:
         return False
 
-    def get_vote_prompt(self, submissions: List["Submission"], **kwargs) -> str:
+    def get_vote_prompt(self, submissions: List[Submission], **kwargs) -> str:
         """
         Returns a prompt to give the Participants to decide their vote.
         """
         if isinstance(submissions, list):
-            submissions_contents_str = ""
-            for i, submission in enumerate(submissions):
-                submissions_contents_str += (
-                    f"Submission {i + 1}:\n{submission.content}\n\n"
-                )
+            submissions_contents_str = "".join(
+                f"Submission {i + 1}:\n{submission.content}\n\n"
+                for i, submission in enumerate(submissions)
+            )
             return self.vote_prompt.format(
                 submissions_contents=submissions_contents_str, **kwargs
             )
-        else:
-            raise TypeError(
-                "get_vote_prompt() requires a list of submissions for compare voting methods."
-            )
+        raise TypeError(
+            "get_vote_prompt() requires a list of submissions for compare voting methods."
+        )

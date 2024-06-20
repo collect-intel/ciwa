@@ -1,7 +1,7 @@
 # tests/test_ranking_comapre.py
 
 import pytest
-from ciwa.models.voting_methods.ranking_compare import RankingCompare
+from ciwa.models.voting_methods import RankingCompare
 from ciwa.models.voting_results import CompareVotingResults
 from ciwa.tests.utils.model_utils import create_submission
 

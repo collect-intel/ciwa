@@ -1,4 +1,8 @@
 # models/voting_methods/score_label.py
+"""
+This module contains the ScoreLabel class, a concrete implementation
+of the LabelVotingMethod, which aggregates scores assigned to individual submissions.
+"""
 
 from typing import List, Dict, Any
 from ciwa.models.voting_methods.voting_method import LabelVotingMethod
@@ -9,6 +13,9 @@ ROUND_NDIGITS = 3
 
 
 class ScoreLabel(LabelVotingMethod):
+    """
+    Concrete VotingMethod class that aggregates scores assigned to individual submissions.
+    """
 
     def __init__(self, start_value: int, end_value: int, increment_value: int = None):
         super().__init__()
@@ -19,6 +26,14 @@ class ScoreLabel(LabelVotingMethod):
     def process_votes(
         self, voting_results: VotingResults, submission_ids: List[str]
     ) -> Dict[str, Any]:
+        """
+        Processes the scores to get an aggregated result.
+
+        Args:
+            voting_results (VotingResults): An object holding the voting results.
+        Returns:
+            Dict[str, Any]: The aggregated result of the votes.
+        """
         aggregated_results = {}
         for submission_id in submission_ids:
             scores = [
@@ -32,7 +47,16 @@ class ScoreLabel(LabelVotingMethod):
             }
         return aggregated_results
 
-    def get_vote_prompt(self, submission: "Submission") -> str:
+    def get_vote_prompt(self, submission: "Submission", **kwargs) -> str:
+        """
+        Generates a prompt for scoring the submission based on its content.
+
+        Args:
+            submission (Submission): The submission.
+
+        Returns:
+            str: The generated prompt for scoring.
+        """
         if self.increment_value:
             values = [
                 str(v)
@@ -44,9 +68,15 @@ class ScoreLabel(LabelVotingMethod):
         else:
             values_str = f"{str(self.start_value)} to {str(self.end_value)}"
 
-        return super().get_vote_prompt(submission, values=values_str)
+        return super().get_vote_prompt(submission, values=values_str, **kwargs)
 
-    def get_vote_schema(self) -> Dict[str, Any]:
+    def get_vote_schema(self, **kwargs) -> Dict[str, Any]:
+        """
+        Returns the schema for validating the scores.
+
+        Returns:
+            Dict[str, Any]: The schema for validating the scores.
+        """
         return SchemaFactory.create_object_schema(
             "vote",
             {

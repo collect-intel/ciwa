@@ -1,7 +1,7 @@
 # tests/test_score_label.py
 
 import pytest
-from ciwa.models.voting_methods.score_label import ScoreLabel
+from ciwa.models.voting_methods import ScoreLabel
 from ciwa.models.voting_results import LabelVotingResults
 
 

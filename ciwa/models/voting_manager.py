@@ -10,9 +10,7 @@ import time
 from abc import ABC, abstractmethod
 from typing import List, Type, Dict, Any
 import jsonschema
-from ciwa.models.voting_methods.voting_method import VotingMethod
 from ciwa.models.voting_methods.voting_method_registry import get_voting_method
-from ciwa.models.submission import Submission
 from ciwa.models.voting_results import LabelVotingResults, CompareVotingResults
 
 
@@ -23,18 +21,18 @@ class VotingManager(ABC):
 
     Attributes:
         voting_method (VotingMethod): The voting method to use for this topic.
-        submissions_needing_votes (asyncio.Queue[Submission]): Queue of submissions needing votes.
+        submissions_needing_votes (asyncio.Queue["Submission"]): Queue of submissions needing votes.
         results (VotingResults): Instance to hold and manage voting results.
         schema (Dict[str, Any]): The JSON schema for the vote data.
         submission_ids (List[str]): List of submission UUIDs that were made available for voting.
     """
 
     def __init__(
-        self, voting_method_class: Type[VotingMethod], topic: "Topic", **kwargs
+        self, voting_method_class: Type["VotingMethod"], topic: "Topic", **kwargs
     ) -> None:
         self.topic = topic
-        self.voting_method: VotingMethod = voting_method_class(**kwargs)
-        self.submissions_needing_votes: asyncio.Queue[Submission] = asyncio.Queue()
+        self.voting_method: "VotingMethod" = voting_method_class(**kwargs)
+        self.submissions_needing_votes: asyncio.Queue["Submission"] = asyncio.Queue()
         self.submission_ids: List[str] = []
         self.results: "VotingResults" = self.initialize_results()
         logging.info(
@@ -48,12 +46,12 @@ class VotingManager(ABC):
         Initialize the appropriate VotingResults instance.
         """
 
-    def add_submission(self, submission: Submission) -> None:
+    def add_submission(self, submission: "Submission") -> None:
         """
         Add a submission to the queue of submissions needing votes.
 
         Args:
-            submission (Submission): The submission to add.
+            submission ("Submission"): The submission to add.
         """
         self.submissions_needing_votes.put_nowait(submission)
         self.submission_ids.append(submission.uuid)
@@ -83,7 +81,7 @@ class LabelVotingManager(VotingManager):
     """
 
     def __init__(
-        self, voting_method_class: Type[VotingMethod], topic: "Topic", **kwargs
+        self, voting_method_class: Type["VotingMethod"], topic: "Topic", **kwargs
     ) -> None:
         super().__init__(voting_method_class, topic, **kwargs)
         self.schema = self.voting_method.get_vote_schema()
@@ -112,7 +110,7 @@ class LabelVotingManager(VotingManager):
             )
 
     async def collect_label_vote(
-        self, participant: "Participant", submission: Submission
+        self, participant: "Participant", submission: "Submission"
     ) -> None:
         """
         Collect a label vote from a participant for the given submission.
@@ -140,7 +138,7 @@ class CompareVotingManager(VotingManager):
     """
 
     def __init__(
-        self, voting_method_class: Type[VotingMethod], topic: "Topic", **kwargs
+        self, voting_method_class: Type["VotingMethod"], topic: "Topic", **kwargs
     ) -> None:
         super().__init__(voting_method_class, topic, **kwargs)
         self.schema = None
@@ -162,7 +160,7 @@ class CompareVotingManager(VotingManager):
         await asyncio.gather(*tasks)
 
     async def collect_compare_vote(
-        self, participant: "Participant", submissions: List[Submission]
+        self, participant: "Participant", submissions: List["Submission"]
     ) -> None:
         """
         Collect a compare vote from a participant for the given submissions.
@@ -183,7 +181,7 @@ class CompareVotingManager(VotingManager):
         except jsonschema.ValidationError as e:
             logging.error("Invalid vote data: %s", e.message)
 
-    async def get_all_submissions(self) -> List[Submission]:
+    async def get_all_submissions(self) -> List["Submission"]:
         """
         Get all submissions needing votes from the queue.
         """

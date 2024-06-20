@@ -1,8 +1,12 @@
 # utils/prompt_loader.py
+"""
+Utility functions for loading prompts from a YAML file.
+"""
 
-import yaml
 import os
 import inspect
+import yaml
+
 
 # Get the absolute path to the prompts.yaml file
 PROMPTS_FILE = os.path.join(
@@ -11,6 +15,9 @@ PROMPTS_FILE = os.path.join(
 
 
 def load_prompts(yaml_file: str = PROMPTS_FILE) -> dict:
+    """
+    Load prompts from a YAML file.
+    """
     if not os.path.exists(yaml_file):
         raise FileNotFoundError(f"YAML file not found: {yaml_file}")
     with open(yaml_file, "r") as file:

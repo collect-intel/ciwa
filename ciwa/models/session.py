@@ -10,10 +10,9 @@ import asyncio
 import json
 import time
 from typing import List, Optional, Dict, Any
-from ciwa.models.topic import Topic, TopicFactory
-from ciwa.models.participants.participant import Participant
-from ciwa.models.participants.participant_factory import ParticipantFactory
 from ciwa.models.identifiable import Identifiable
+from ciwa.models.participants.participant_factory import ParticipantFactory
+from ciwa.models.topic import TopicFactory
 
 
 class Session(Identifiable):
@@ -49,10 +48,10 @@ class Session(Identifiable):
         self.name: str = kwargs.get("name", "Session")
         self.description: str = kwargs.get("description", "A Session.")
         self.is_complete: bool = False
-        self.topics: List[Topic] = self._init_topics(
+        self.topics: List["Topic"] = self._init_topics(
             topics_config or [], default_topic_settings or {}
         )
-        self.participants: List[Participant] = self._init_participants(
+        self.participants: List["Participant"] = self._init_participants(
             participants_config or []
         )
         self.max_concurrent: int = max_concurrent
@@ -66,7 +65,8 @@ class Session(Identifiable):
         self,
         topics_config: List[Dict[str, Any]],
         default_topic_settings: Dict[str, Any],
-    ) -> List[Topic]:
+    ) -> List["Topic"]:
+
         return [
             TopicFactory.create_topic(
                 session=self, **{**default_topic_settings, **topic_config}
@@ -76,7 +76,8 @@ class Session(Identifiable):
 
     def _init_participants(
         self, participants_config: List[Dict[str, Any]]
-    ) -> List[Participant]:
+    ) -> List["Participant"]:
+
         return [
             ParticipantFactory.create_participant(**participant_config)
             for participant_config in participants_config
@@ -127,7 +128,7 @@ class Session(Identifiable):
         logging.info("All submissions gathered.")
 
     async def create_submission_task(
-        self, participant: Participant, topic: Topic
+        self, participant: "Participant", topic: "Topic"
     ) -> None:
         """
         Creates a submission task for a given participant and topic.
@@ -188,7 +189,7 @@ class Session(Identifiable):
         await asyncio.gather(*tasks)
 
     async def _collect_votes_with_logging(
-        self, topic: Topic, start_time: float
+        self, topic: "Topic", start_time: float
     ) -> None:
         """
         Collect votes for a topic and log the time taken.

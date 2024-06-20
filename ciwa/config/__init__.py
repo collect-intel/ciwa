@@ -1,3 +1,4 @@
-# filename: ciwa/config/__init__.py
+# ciwa/config/__init__.py
 
-# Setup for configuration directory.
+from .logging_config import setup_logging
+from .config_manager import ConfigManager

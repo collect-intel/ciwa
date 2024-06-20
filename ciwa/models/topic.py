@@ -7,12 +7,8 @@ in a discussion or debate platform. Topics can handle submissions and apply a vo
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Dict, Any, List
-from ciwa.models.voting_manager import VotingManagerFactory
+from typing import Dict, Any, List
 from ciwa.models.identifiable import Identifiable
-
-if TYPE_CHECKING:
-    from ciwa.models.session import Session
 
 
 class Topic(Identifiable):
@@ -44,6 +40,8 @@ class Topic(Identifiable):
         self.description: str = description
         self.submissions: List["Submission"] = []
         self.submissions_queue: asyncio.Queue = asyncio.Queue()
+        from ciwa.models.voting_manager import VotingManagerFactory
+
         self.voting_manager = VotingManagerFactory.create_voting_manager(
             voting_method=voting_method,
             topic=self,

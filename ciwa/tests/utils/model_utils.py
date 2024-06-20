@@ -1,5 +1,9 @@
 # tests/utils/model_utils.py
 
+"""
+This module provides utility functions for creating model instances for testing purposes.
+"""
+
 from ciwa.models.session import Session
 from ciwa.models.topic import TopicFactory
 from ciwa.models.participants.participant_factory import ParticipantFactory

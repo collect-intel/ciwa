@@ -5,13 +5,8 @@ This module provides the Submission class, representing a submission made by a p
 on a particular topic.
 """
 
-from typing import TYPE_CHECKING
 import datetime
 from ciwa.models.identifiable import Identifiable
-
-if TYPE_CHECKING:
-    from ciwa.models.topic import Topic
-    from ciwa.models.participants.participant import Participant
 
 
 class Submission(Identifiable):

@@ -5,7 +5,7 @@ from ciwa.models.voting_manager import VotingManagerFactory
 from ciwa.models.topic import TopicFactory
 from ciwa.models.session import Session
 from ciwa.models.submission import Submission
-from ciwa.models.participants.participant_factory import ParticipantFactory
+from ciwa.models.participants import ParticipantFactory
 
 
 @pytest.fixture

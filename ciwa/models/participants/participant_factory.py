@@ -1,7 +1,10 @@
 # models/participants/participant_factory.py
 
+"""
+Factory class for creating participants.
+"""
+
 import logging
-from typing import Any
 from ciwa.models.participants.llm_agent_participant import LLMAgentParticipant
 from ciwa.models.participants.conversable_agent_participant import (
     ConversableAgentParticipant,

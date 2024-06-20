@@ -1,7 +1,7 @@
 # ciwa/tests/test_participant.py
 
 import pytest
-from ciwa.models.participants.participant_factory import ParticipantFactory
+from ciwa.models.participants import ParticipantFactory
 from ciwa.models.session import Session
 from ciwa.models.topic import TopicFactory
 from ciwa.models.submission import Submission

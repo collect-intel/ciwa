@@ -1,5 +1,7 @@
+# tests/test_yes_no_label.py
+
 import pytest
-from ciwa.models.voting_methods.yes_no_label import YesNoLabel
+from ciwa.models.voting_methods import YesNoLabel
 from ciwa.models.voting_results import LabelVotingResults
 
 

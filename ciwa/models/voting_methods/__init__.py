@@ -1,5 +1,9 @@
 # models/voting_methods/__init__.py
 
+from ciwa.models.voting_methods.voting_method import (
+    LabelVotingMethod,
+    CompareVotingMethod,
+)
 from ciwa.models.voting_methods.enum_label import EnumLabel
 from ciwa.models.voting_methods.yes_no_label import YesNoLabel
 from ciwa.models.voting_methods.ranking_compare import RankingCompare

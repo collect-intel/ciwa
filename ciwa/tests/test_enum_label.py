@@ -1,7 +1,7 @@
 # tests/test_enum_label.py
 
 import pytest
-from ciwa.models.voting_methods.enum_label import EnumLabel
+from ciwa.models.voting_methods import EnumLabel
 from ciwa.models.voting_results import LabelVotingResults
 
 

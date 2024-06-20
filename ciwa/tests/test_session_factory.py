@@ -3,7 +3,7 @@
 import pytest
 from ciwa.models.session import SessionFactory
 from ciwa.models.process import Process
-from ciwa.models.participants.participant_factory import ParticipantFactory
+from ciwa.models.participants import ParticipantFactory
 
 
 @pytest.fixture
