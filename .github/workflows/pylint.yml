@@ -20,4 +20,7 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py')
+        pylint --fail-under=6.60 $(git ls-files '*.py')
+    - name: Output Pylint Score
+      run: |
+        echo "Pylint score for Python ${{ matrix.python-version }}: $(pylint $(git ls-files '*.py') | grep 'Your code has been rated at')"
