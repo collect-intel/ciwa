@@ -13,7 +13,26 @@ from ciwa.tests.utils.model_utils import (
 
 
 @pytest.fixture
-def conversable_agent_participant():
+def mock_openai():
+    with patch("autogen.oai.client.OpenAI") as mock_openai:
+        mock_openai.return_value = MagicMock()
+        yield mock_openai
+
+
+@pytest.fixture
+def mock_file_operations(mock_openai):
+    with patch("os.path.isfile", return_value=True), patch(
+        "ciwa.models.participants.conversable_agent_participant.autogen.config_list_from_json",
+        return_value=[{"config": "test"}],
+    ), patch(
+        "ciwa.models.participants.conversable_agent_participant.autogen.filter_config",
+        return_value=[{"config": "test"}],
+    ):
+        yield
+
+
+@pytest.fixture
+def conversable_agent_participant(mock_file_operations):
     return ConversableAgentParticipant(model="gpt-3.5-turbo")
 
 
@@ -56,9 +75,9 @@ def test_init_agent(
     mock_isfile,
     conversable_agent_participant,
 ):
+
     mock_config_list_from_json.return_value = [{"config": "test"}]
     mock_filter_config.return_value = [{"config": "test"}]
-
     agent = conversable_agent_participant._init_agent(temperature=0.7, timeout=30)
     assert agent is not None
     mock_config_list_from_json.assert_called_once()
@@ -66,27 +85,18 @@ def test_init_agent(
 
 
 def test_load_config_list(conversable_agent_participant):
-    with patch(
-        "ciwa.models.participants.conversable_agent_participant.autogen.config_list_from_json",
-        return_value=[{"config": "test"}],
-    ):
-        with patch(
-            "ciwa.models.participants.conversable_agent_participant.autogen.filter_config",
-            return_value=[{"config": "test"}],
-        ):
-            config_list = conversable_agent_participant._load_config_list(
-                "/path/to/config"
-            )
-            assert config_list == [{"config": "test"}]
+    config_list = conversable_agent_participant._load_config_list(
+        "/dummy/path/to/config"
+    )
+    assert config_list == [{"config": "test"}]
 
 
 @pytest.mark.asyncio
-@patch.dict("os.environ", {"OPENAI_API_KEY": "test_api_key"})
 async def test_send_prompt(conversable_agent_participant):
-    with patch.object(conversable_agent_participant, "agent", new=MagicMock()):
-        conversable_agent_participant.agent.a_generate_reply = AsyncMock(
-            return_value="Test reply"
-        )
+    with patch.object(
+        conversable_agent_participant.agent, "a_generate_reply", new_callable=AsyncMock
+    ) as mock_generate_reply:
+        mock_generate_reply.return_value = "Test reply"
         schema = {
             "type": "object",
             "properties": {"content": {"type": "string"}},
@@ -98,7 +108,7 @@ async def test_send_prompt(conversable_agent_participant):
             "Test prompt", schema
         )
         assert response == "Test reply"
-        conversable_agent_participant.agent.a_generate_reply.assert_called_once()
+        mock_generate_reply.assert_called_once()
 
 
 @pytest.mark.asyncio
