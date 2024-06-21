@@ -42,7 +42,6 @@ class Participant(Identifiable, ABC):
             async for submission in participant.generate_submissions(topic, 5):
                 process_submission(submission)
         """
-        pass
 
     @abstractmethod
     async def create_submission(self, topic: "Topic") -> "Submission":
@@ -55,7 +54,6 @@ class Participant(Identifiable, ABC):
         Returns:
             Submission: The created submission.
         """
-        pass
 
     @abstractmethod
     async def get_label_vote_response(
@@ -72,7 +70,6 @@ class Participant(Identifiable, ABC):
         Returns:
             dict: The vote response.
         """
-        pass
 
     @abstractmethod
     async def get_compare_vote_response(
@@ -92,7 +89,6 @@ class Participant(Identifiable, ABC):
         Returns:
             dict: The vote response.
         """
-        pass
 
     @staticmethod
     @abstractmethod
@@ -103,7 +99,6 @@ class Participant(Identifiable, ABC):
         Returns:
             dict: The JSON schema.
         """
-        pass
 
     @abstractmethod
     def to_json(self) -> dict:

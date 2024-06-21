@@ -79,9 +79,9 @@ class RankingCompare(CompareVotingMethod):
             "type": "array",
             "title": "List of Unique Integers representing the preferred order of submissions",
             "description": (
-                "A list of unique integers in the range from 1 to {num_submissions} with each integer "
-                "corresponding to a submission, where the order of the integers represents the ranking "
-                "of the submissions."
+                "A list of unique integers in the range from 1 to {num_submissions} with each "
+                "integer corresponding to a submission, where the order of the integers represents "
+                "the ranking of the submissions."
             ),
             "uniqueItems": True,
             "items": {"type": "integer", "minimum": 1, "maximum": num_submissions},

@@ -22,3 +22,6 @@ RankingCompare:
 
 ScoreLabel:
   vote_prompt: "Please provide your score for the following submission:\n{submission_content}\nChoose a value from: {values}"
+
+ScoreCompare:
+  vote_prompt: "Please provide your score for each of the following submissions:\n{submissions_contents}\nChoose a value from: {values}"

@@ -63,15 +63,13 @@ class Submission(Identifiable):
         }
 
     @staticmethod
-    def get_response_schema() -> dict:
+    def get_response_schema(content_schema: dict) -> dict:
         """
         Returns the JSON schema to represent the properties a Participant is expected to
         respond with to create a Submission.
         """
         return {
             "type": "object",
-            "properties": {
-                "content": {"type": "string"},
-            },
+            "properties": {"content": content_schema},
             "required": ["content"],
         }

@@ -7,8 +7,10 @@ in a discussion or debate platform. Topics can handle submissions and apply a vo
 
 import asyncio
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Callable
 from ciwa.models.identifiable import Identifiable
+from ciwa.models.voting_manager import VotingManagerFactory
+from ciwa.models.schema_factory import SchemaFactory
 
 
 class Topic(Identifiable):
@@ -40,31 +42,73 @@ class Topic(Identifiable):
         self.description: str = description
         self.submissions: List["Submission"] = []
         self.submissions_queue: asyncio.Queue = asyncio.Queue()
-        from ciwa.models.voting_manager import VotingManagerFactory
-
         self.voting_manager = VotingManagerFactory.create_voting_manager(
             voting_method=voting_method,
             topic=self,
             **(voting_method_config or {}),
         )
+        self.set_submission_validator(
+            submission_validator=kwargs.get("submission_validator", None),
+            submission_invalid_message=kwargs.get("submission_invalid_message", None),
+        )
+        self.set_submission_content_schema(
+            schema=kwargs.get("submission_content_schema", {"type": "string"})
+        )
+
         logging.info("Topic initialized with UUID: %s", self.uuid)
 
     async def add_submission(self, submission: "Submission") -> None:
         """
-        Asynchronously adds a submission to the topic's queue of submissions.
+        Asynchronously adds a submission to the topic's queue of submissions if
+        it passes the validation.
 
         Args:
             submission (Submission): The submission to add to the topic.
         """
-        await self.submissions_queue.put(submission)
-        self.submissions.append(submission)
-        self.voting_manager.add_submission(submission)
-        logging.info(
-            "Submission %s added to Topic %s with UUID: %s",
-            submission.uuid,
-            self.title,
-            self.uuid,
+        if self.submission_validator(submission):
+            await self.submissions_queue.put(submission)
+            self.submissions.append(submission)
+            self.voting_manager.add_submission(submission)
+            logging.info("Submission %s added to Topic %s", submission.uuid, self.title)
+        else:
+            logging.warning(
+                "Submission %s is invalid for Topic %s: %s",
+                submission.uuid,
+                self.title,
+                self.submission_invalid_message,
+            )
+
+    def set_submission_validator(
+        self,
+        submission_validator: Callable[[Any], bool] = None,
+        submission_invalid_message: str = None,
+    ) -> None:
+        """
+        Sets the submission validation function for this topic.
+
+        Args:
+            submission_validator (Callable[[Any], bool]): The function to validate submissions.
+            submission_invalid_message (str): The message to return to a Participant when
+            a submission is invalid.
+        """
+        self.submission_validator: Callable[[Any], bool] = submission_validator or (
+            lambda x: True
         )
+        self.submission_invalid_message: str = (
+            submission_invalid_message or "Submission is invalid."
+        )
+
+    def set_submission_content_schema(self, schema: Dict[str, Any]) -> None:
+        """
+        Sets the schema for the content of a submission. Raises exception if schema is invalid.
+
+        Args:
+            schema (Dict[str, Any]): The schema for the content of a submission.
+        """
+
+        content_schema = SchemaFactory.create_object_schema("content", schema)
+        SchemaFactory.validate_schema(content_schema)
+        self.submission_content_schema: Dict[str, Any] = schema
 
     @staticmethod
     def get_object_schema() -> dict:
@@ -119,10 +163,10 @@ class TopicFactory:
         Returns:
             Topic: An instance of Topic configured as specified by the input parameters.
         """
-        title = kwargs.get("title", "Default Topic Title")
-        description = kwargs.get("description", "No description provided.")
+        title = kwargs.pop("title", "")
+        description = kwargs.pop("description", "")
         voting_method_config = kwargs.pop("voting_method", {})
-        voting_method = voting_method_config.pop("type", "YesNoLabel")
+        voting_method = voting_method_config.pop("type")
 
         return Topic(
             session=session,
@@ -130,4 +174,5 @@ class TopicFactory:
             description=description,
             voting_method=voting_method,
             voting_method_config=voting_method_config,
+            **kwargs,
         )

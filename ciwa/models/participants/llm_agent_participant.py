@@ -5,7 +5,7 @@ Agent participant in the system. This class is responsible for generating submis
 based on a given topic.
 """
 
-from typing import List, Dict, Any, AsyncGenerator, Optional
+from typing import List, Dict, Any, AsyncGenerator, Optional, Callable
 import asyncio
 import logging
 from ciwa.models.participants.participant import Participant
@@ -84,14 +84,19 @@ class LLMAgentParticipant(Participant):
         """
         submission_prompt = self.get_submission_prompt(topic.title, topic.description)
         submission_response_schema = SchemaFactory.create_object_schema(
-            "submission", Submission.get_response_schema()
+            "submission",
+            Submission.get_response_schema(topic.submission_content_schema),
         )
 
-        submission_response = await self.send_prompt_with_retries(
-            submission_prompt, submission_response_schema
+        # Use the _get_submission_response method
+        submission_response = await self._get_submission_response(
+            prompt=submission_prompt,
+            schema=submission_response_schema,
+            validator=topic.submission_validator,
+            invalid_message=topic.submission_invalid_message,
         )
 
-        if submission_response is None:
+        if not submission_response:
             logging.error(
                 "Submission generation failed for %s %s",
                 self.__class__.__name__,
@@ -103,19 +108,74 @@ class LLMAgentParticipant(Participant):
         content = submission_response["submission"]["content"]
         return Submission(topic, self, content)
 
+    async def _get_submission_response(
+        self,
+        prompt: str,
+        schema: dict,
+        validator: Callable[[Any], bool],
+        invalid_message: str,
+    ) -> dict:
+        """
+        Gets a submission response with retries if the response is invalid.
+
+        Args:
+            prompt (str): The prompt to send.
+            schema (dict): The schema to validate the response against.
+            validator (Callable[[Any], bool]): The function to validate the submission.
+            invalid_message (str): The message to display if the submission is invalid.
+
+        Returns:
+            dict: The valid response, or an empty dict if all attempts fail.
+        """
+        validation_steps = [
+            (self._validate_json_schema(schema), self.prompts["invalid_json_response"]),
+            (validator, invalid_message),
+        ]
+        submission_json = await self.send_prompt_with_retries(
+            prompt=prompt, response_schema=schema, validation_steps=validation_steps
+        )
+        if submission_json is None:
+            logging.error(
+                "Submission generation failed for %s %s",
+                self.__class__.__name__,
+                self.uuid,
+            )
+            return {}
+        return submission_json
+
+    def _validate_json_schema(self, schema: dict) -> Callable[[Any], bool]:
+        """
+        Returns a validator function that validates a response against a given JSON schema.
+
+        Args:
+            schema (dict): The JSON schema to validate against.
+
+        Returns:
+            Callable[[Any], bool]: The validator function.
+        """
+
+        def validator(response: Any) -> bool:
+            return json_utils.is_valid_json_for_schema(response, schema)
+
+        return validator
+
     async def send_prompt_with_retries(
         self,
         prompt: str,
         response_schema: Dict[str, Any],
+        validation_steps: List[tuple[Callable[[Any], bool], str]],
         max_attempts: Optional[int] = None,
         attempt: int = 0,
     ) -> Optional[Dict[str, Any]]:
         """
-        Sends a prompt with retries if the response is invalid.
+        Sends a prompt with retries if the response is invalid based on the provided
+        validation steps.
 
         Args:
             prompt (str): The prompt to send.
             response_schema (Dict[str, Any]): The schema to validate the response against.
+            validation_steps (List[tuple[Callable[[Any], bool], str]]): List of tuples
+                containing validator functions and their corresponding invalid messages.
             max_attempts (Optional[int]): The maximum number of attempts.
             attempt (int): The current attempt number.
 
@@ -125,31 +185,29 @@ class LLMAgentParticipant(Participant):
         max_attempts = max_attempts or self.max_response_attempts
         response = await self.send_prompt(prompt, response_schema)
         response_json = json_utils.get_json(response)
-        if response_json and json_utils.is_valid_json_for_schema(
-            response_json, response_schema
-        ):
-            return response_json
 
-        retry_prompt = f"{self.prompts['invalid_json_response']}\n{prompt}"
-        if attempt < max_attempts:
-            logging.info(
-                "Attempt %d of %d: Invalid JSON response received from %s %s:\n%s\nRetrying...",
-                attempt + 1,
-                max_attempts,
-                self.__class__.__name__,
-                self.uuid,
-                response,
-            )
-            return await self.send_prompt_with_retries(
-                retry_prompt, response_schema, max_attempts, attempt + 1
-            )
-
-        logging.error(
-            "Max attempts reached. Invalid JSON response received from %s %s.",
-            self.__class__.__name__,
-            self.uuid,
-        )
-        return None
+        for validator, invalid_message in validation_steps:
+            if not validator(response_json):
+                retry_prompt = f"{invalid_message}\n{prompt}"
+                if attempt < max_attempts:
+                    logging.info(
+                        "Attempt %d of %d: Invalid response received from %s %s:\n%s\nRetrying...",
+                        attempt + 1,
+                        max_attempts,
+                        self.__class__.__name__,
+                        self.uuid,
+                        response,
+                    )
+                    return await self.send_prompt_with_retries(
+                        retry_prompt, validation_steps, max_attempts, attempt + 1
+                    )
+                logging.error(
+                    "Max attempts reached. Invalid response received from %s %s.",
+                    self.__class__.__name__,
+                    self.uuid,
+                )
+                return None
+        return response_json
 
     async def send_prompt(
         self, prompt: str, response_schema: Dict[str, Any]
@@ -178,7 +236,12 @@ class LLMAgentParticipant(Participant):
         Returns:
             dict: The valid response, or an empty dict if all attempts fail.
         """
-        vote_json = await self.send_prompt_with_retries(prompt, schema)
+        validation_steps = [
+            (self._validate_json_schema(schema), self.prompts["invalid_json_response"]),
+        ]
+        vote_json = await self.send_prompt_with_retries(
+            prompt=prompt, response_schema=schema, validation_steps=validation_steps
+        )
         if vote_json is None:
             logging.error(
                 "Vote generation failed for %s %s", self.__class__.__name__, self.uuid

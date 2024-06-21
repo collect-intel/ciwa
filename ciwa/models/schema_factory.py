@@ -18,7 +18,7 @@ class SchemaFactory:
         OBJECT_TYPES (List[str]): The list of supported object types.
     """
 
-    OBJECT_TYPES = ["vote", "submission", "topic"]
+    OBJECT_TYPES = ["vote", "submission", "topic", "content"]
 
     @staticmethod
     def create_object_schema(
