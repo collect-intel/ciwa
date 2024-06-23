@@ -79,7 +79,6 @@ class ConversableAgentParticipant(LLMAgentParticipant):
             list: The loaded configuration list.
         """
         filter_dict = {
-            "response_format": [{"type": "json_object"}],
             "model": self.model,
         }
         config_list = autogen.config_list_from_json(env_or_file=config_path)

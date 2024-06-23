@@ -17,32 +17,12 @@ process:
       voting_method:
         type: "RankingCompare"
     participants:
-      - type: "LLMAgentParticipant"
+      - type: "ConversableAgentParticipant"
         model: "gpt-3.5-turbo"
         temperature: 2.0
         cache_seed: null
-      - type: "LLMAgentParticipant"
-        model: "gpt-3.5-turbo"
-        temperature: 2.0
-        cache_seed: null
-      - type: "LLMAgentParticipant"
-        model: "gpt-3.5-turbo"
-        temperature: 2.0
-        cache_seed: null
-      - type: "LLMAgentParticipant"
-        model: "gpt-3.5-turbo"
-        temperature: 2.0
-        cache_seed: null
-      - type: "LLMAgentParticipant"
-        model: "gpt-3.5-turbo"
-        temperature: 2.0
-        cache_seed: null
-      - type: "LLMAgentParticipant"
-        model: "gpt-3.5-turbo"
-        temperature: 2.0
-        cache_seed: null
-      - type: "LLMAgentParticipant"
-        model: "gpt-3.5-turbo"
+      - type: "ConversableAgentParticipant"
+        model: "claude-2.1"
         temperature: 2.0
         cache_seed: null
   sessions:
