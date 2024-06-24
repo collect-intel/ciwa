@@ -61,7 +61,7 @@ def display_results(session: "Session", aggregated_only: bool = False) -> None:
             ]:
                 submission_uuid = submission_result["uuid"]
                 display_markdown(
-                    f"- **Submission UUID**: {submission_uuid}\n   - **Submission**: {submissions[submission_uuid]}\n   - **{topic["voting_method"]} Result**: {submission_result['result']}",
+                    f"- **Submission UUID**: {submission_uuid}\n   - **Submission**: {submissions[submission_uuid]}\n   - **{topic['voting_method']} Result**: {submission_result['result']}",
                     raw=True,
                 )
     else:
