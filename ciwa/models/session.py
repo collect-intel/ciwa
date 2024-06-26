@@ -41,6 +41,7 @@ class Session(Identifiable):
         max_subs_per_topic: int = 1,
         max_concurrent: int = 50,
         save_results: bool = True,
+        batch_submissions: bool = False,
         **kwargs,
     ) -> None:
         super().__init__()
@@ -58,6 +59,7 @@ class Session(Identifiable):
         self.max_subs_per_topic: int = max_subs_per_topic
         self.results: Dict[str, Any] = {}
         self.do_save_results: bool = save_results
+        self.do_batch_submissions = batch_submissions
         logging.info("Session initialized with UUID: %s", self.uuid)
         logging.info("Session topics: %s", [topic.title for topic in self.topics])
 
@@ -148,13 +150,46 @@ class Session(Identifiable):
                 time.time() - start_time,
             )
 
+    async def _generate_submissions(self) -> None:
+        tasks = []
+        for topic in self.topics:
+            for participant in self.participants:
+                if self.do_batch_submissions:
+                    tasks.append(self._generate_batch_submissions(topic, participant))
+                else:
+                    for _ in range(self.max_subs_per_topic):
+                        tasks.append(
+                            self._generate_single_submission(topic, participant)
+                        )
+
+        await asyncio.gather(*tasks)
+
+    async def _generate_single_submission(
+        self, topic: "Topic", participant: "Participant"
+    ) -> None:
+        submission = await participant.create_submission(topic)
+        await topic.add_submission(submission)
+
+    async def _generate_batch_submissions(
+        self, topic: "Topic", participant: "Participant"
+    ) -> None:
+        submissions = await participant.create_batch_submissions(
+            topic, self.max_subs_per_topic
+        )
+        for submission in submissions:
+            await topic.add_submission(submission)
+
     async def run(self) -> None:
         """
         Run the session by conducting activities asynchronously.
         """
         logging.info("Running session %s.", self.uuid)
         start_time = time.time()
-        await self.gather_submissions()
+        USE_OLD_CODE = False
+        if USE_OLD_CODE:
+            await self.gather_submissions()
+        else:
+            await self._generate_submissions()
         await self.collect_all_votes()
         await self.gather_results()
         self.conclude()

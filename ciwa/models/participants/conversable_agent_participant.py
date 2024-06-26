@@ -7,9 +7,11 @@ that interacts with a ConversableAgent in the CIWA system.
 
 import logging
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List
+import re
 import autogen
 from ciwa.models.participants.llm_agent_participant import LLMAgentParticipant
+import ciwa.utils.json_utils as json_utils
 
 
 class ConversableAgentParticipant(LLMAgentParticipant):
@@ -48,6 +50,7 @@ class ConversableAgentParticipant(LLMAgentParticipant):
             raise FileNotFoundError(f"Config file not found at path: {config_path}")
 
         config_list = self._load_config_list(config_path)
+        config_list = self._add_model_specific_config(config_list)
 
         agent_kwargs = {
             key: kwargs[key]
@@ -56,7 +59,8 @@ class ConversableAgentParticipant(LLMAgentParticipant):
         }
 
         logging.info(
-            "Creating ConversableAgent with config: %s and kwargs: %s",
+            "Creating ConversableAgent %s with config: %s and kwargs: %s",
+            self.uuid,
             config_list,
             agent_kwargs,
         )
@@ -67,6 +71,51 @@ class ConversableAgentParticipant(LLMAgentParticipant):
             human_input_mode="NEVER",
             code_execution_config=False,
         )
+
+    def _add_model_specific_config(
+        self, config_list: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        Adds model-specific configuration to the provided configuration.
+
+        Args:
+            config_list (List[Dict[str, Any]]): The configuration list to update.
+
+        Returns:
+            List[Dict[str, Any]]: The updated configuration list.
+        """
+        if "gemini" in self.model:
+            # Default safety settings.
+            default_safety_settings = {
+                "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
+                "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
+                "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_NONE",
+                "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_NONE",
+            }
+            for config in config_list:
+                # Overwrite default settings with those provided in config, if any.
+                if "safety_settings" in config:
+                    config_safety_dict = {
+                        setting["category"]: setting["threshold"]
+                        for setting in config["safety_settings"]
+                    }
+                    updated_safety_settings = [
+                        {
+                            "category": category,
+                            "threshold": config_safety_dict.get(category, threshold),
+                        }
+                        for category, threshold in default_safety_settings.items()
+                    ]
+                else:
+                    # If no overrides, convert default settings to list format.
+                    updated_safety_settings = [
+                        {"category": k, "threshold": v}
+                        for k, v in default_safety_settings.items()
+                    ]
+
+                config["safety_settings"] = updated_safety_settings
+
+        return config_list
 
     def _load_config_list(self, config_path: str) -> list:
         """
@@ -94,19 +143,37 @@ class ConversableAgentParticipant(LLMAgentParticipant):
             )
         return config_list
 
-    async def send_prompt(self, prompt: str, response_schema: Dict[str, Any]) -> str:
+    async def _send_prompt(self, prompt: str) -> str:
         """
         Sends a prompt to the ConversableAgent and returns the response.
 
         Args:
             prompt (str): The prompt to send.
-            response_schema (Dict[str, Any]): The schema to validate the response against.
 
         Returns:
             str: The response from the ConversableAgent.
         """
-        prompt += f"\n{self.get_respond_with_json(response_schema)}"
-        reply = await self.agent.a_generate_reply(
-            messages=[{"content": prompt, "role": "user"}]
-        )
-        return reply
+        messages = [{"content": prompt, "role": "user"}]
+        reply = await self.agent.a_generate_reply(messages=messages)
+        return self._get_model_specific_response(reply)
+
+    def _get_model_specific_response(self, response: any) -> str:
+        """
+        Extracts the model-specific response from the response dictionary.
+
+        Args:
+            response (Dict[str, Any]): The response dictionary.
+
+        Returns:
+            str: The model-specific response.
+        """
+        if "claude" in self.model or "gemini" in self.model or "mistral" in self.model:
+            response = response["content"]
+            if not response.startswith("{"):
+                logging.info(
+                    "LLM response from %s is not json only. Extracting json from response:\n%s",
+                    self.uuid,
+                    response,
+                )
+                response = json_utils.extract_json(text=response)
+        return response

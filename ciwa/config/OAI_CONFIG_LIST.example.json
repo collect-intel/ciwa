@@ -1,21 +1,38 @@
 [
     {
         "model": "gpt-4-0125-preview",
-        "api_key": "{YOUR_API_KEY}",
+        "api_key": "{YOUR_OPENAI_API_KEY}",
         "response_format": {"type": "json_object"},
         "tags": ["gpt-4", "openai", "json"]
     },
     {
         "model": "gpt-3.5-turbo",
-        "api_key": "{YOUR_API_KEY}",
+        "api_key": "{YOUR_OPENAI_API_KEY}",
         "response_format": {"type": "json_object"},
         "tags": ["gpt-3.5", "openai", "json"]
     },
     {
         "model": "claude-2.1",
-        "api_key": "{YOUR_API_KEY}",
+        "api_key": "{YOUR_ANTHROPIC_API_KEY}",
         "api_type": "anthropic",
         "temperature": 0.5,
-        "tags": ["claude", "anthropic","json"]
+        "tags": ["claude", "anthropic"]
     },
+    {
+        "model": "lmstudio-ai/gemma-2b-it-GGUF/gemma-2b-it-q8_0.gguf:0",
+        "base_url": "http://localhost:1234/v1",
+        "api_key": "lm-studio",
+        "tags": ["gemma", "lm-studio"]
+    },
+    {
+        "model": "gemini-1.0-pro",
+        "api_key": "{YOUR_GEMINI_API_KEY}",
+        "api_type": "google",
+        "tags": ["gemini", "google"]
+    },
+    {
+        "model": "mistral-large-latest",
+        "api_key": "{YOUR_MISTRAL_API_KEY}",
+        "api_type": "mistral"
+    }
 ]

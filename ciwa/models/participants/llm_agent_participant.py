@@ -11,8 +11,8 @@ import logging
 from ciwa.models.participants.participant import Participant
 from ciwa.models.submission import Submission
 from ciwa.utils import prompt_loader
-from ciwa.tests.utils import json_utils
-from ciwa.models.schema_factory import SchemaFactory
+from ciwa.utils import json_utils
+from ciwa.utils.json_utils import SchemaFactory
 
 
 # for testing only:
@@ -74,7 +74,7 @@ class LLMAgentParticipant(Participant):
 
     async def create_submission(self, topic: "Topic") -> Optional[Submission]:
         """
-        Simulates the generation of a single submission for a given topic by an LLM.
+        Generates a single submission for a given topic by an LLM.
 
         Args:
             topic (Topic): The topic for which the submission is created.
@@ -83,11 +83,7 @@ class LLMAgentParticipant(Participant):
             Submission: The generated submission, or None if generation fails.
         """
         submission_prompt = self.get_submission_prompt(topic.title, topic.description)
-        submission_response_schema = SchemaFactory.create_object_schema(
-            "submission",
-            Submission.get_response_schema(topic.submission_content_schema),
-        )
-
+        submission_response_schema = self._get_submission_response_schema(topic)
         # Use the _get_submission_response method
         submission_response = await self._get_submission_response(
             prompt=submission_prompt,
@@ -107,6 +103,59 @@ class LLMAgentParticipant(Participant):
         logging.info("Submission response received: %s", submission_response)
         content = submission_response["submission"]["content"]
         return Submission(topic, self, content)
+
+    def _get_submission_response_schema(self, topic: "Topic") -> dict:
+        """
+        Returns the JSON schema for a submission response.
+        """
+        return SchemaFactory.create_object_schema(
+            "submission",
+            Submission.get_response_schema(topic.submission_content_schema),
+        )
+
+    def _get_batch_submissions_response_schema(
+        self, num_submissions: int, topic: "Topic"
+    ) -> dict:
+        """
+        Returns the JSON schema for a batch submission response.
+        """
+        return SchemaFactory.create_object_schema(
+            "submissions",
+            Submission.get_batch_submissions_schema(
+                num_submissions=num_submissions,
+                content_schema=topic.submission_content_schema,
+            ),
+        )
+
+    async def create_batch_submissions(
+        self, topic: "Topic", max_subs_per_topic: int
+    ) -> List[Submission]:
+        """
+        Generates a batch of submissions for a given topic by an LLM.
+        """
+
+        prompt = self.prompts["batch_submissions_prompt"].format(
+            topic_title=topic.title,
+            topic_description=topic.description,
+            max_subs_per_topic=max_subs_per_topic,
+        )
+
+        submissions_response = await self._get_submission_response(
+            prompt=prompt,
+            schema=self._get_batch_submissions_response_schema(
+                num_submissions=max_subs_per_topic, topic=topic
+            ),
+            validator=topic.submission_validator,
+            invalid_message=topic.submission_invalid_message,
+        )
+
+        submissions = submissions_response.get("submissions", [])
+        try:
+            return [Submission(topic, self, item["content"]) for item in submissions]
+        except:
+            import pdb
+
+            pdb.set_trace()
 
     async def _get_submission_response(
         self,
@@ -199,7 +248,11 @@ class LLMAgentParticipant(Participant):
                         response,
                     )
                     return await self.send_prompt_with_retries(
-                        retry_prompt, validation_steps, max_attempts, attempt + 1
+                        prompt=retry_prompt,
+                        response_schema=response_schema,
+                        validation_steps=validation_steps,
+                        max_attempts=max_attempts,
+                        attempt=attempt + 1,
                     )
                 logging.error(
                     "Max attempts reached. Invalid response received from %s %s.",
@@ -222,7 +275,24 @@ class LLMAgentParticipant(Participant):
         Returns:
             Dict[str, Any]: The simulated response.
         """
+        response_schema_string = json_utils.get_json_string(response_schema)
+        prompt += f"\n{self.get_respond_with_json(response_schema_string)}"
+        logging.info(
+            "Sending prompt to %s %s: %s", self.__class__.__name__, self.uuid, prompt
+        )
+        response = await self._send_prompt(prompt)
+        return response
+
+    async def _send_prompt(self, prompt: str) -> str:
+        """
+        Method to be implemented by subclasses to send the prepared prompt to the LLM model.
+
+        By default, this method will sleep for a short time to simulate processing, and
+        return random JSON data based on the provided schema. Subclasses should override
+        this method to send the prompt to the LLM model and return the actual response.
+        """
         await asyncio.sleep(SLEEP_DELAY)  # Simulate processing time
+        response_schema = json_utils.extract_json_schema(prompt)
         return json_utils.generate_fake_json(response_schema)
 
     async def _get_vote_response(self, prompt: str, schema: dict) -> dict:

@@ -51,6 +51,20 @@ class Submission(Identifiable):
             "required": ["uuid", "participant_uuid", "content", "created_at"],
         }
 
+    @staticmethod
+    def get_batch_submissions_schema(
+        num_submissions: int, content_schema: dict
+    ) -> dict:
+        """
+        Returns the JSON array schema to represent a batch of submissions.
+        """
+        return {
+            "type": "array",
+            "items": Submission.get_response_schema(content_schema),
+            "minItems": num_submissions,
+            "maxItems": num_submissions,
+        }
+
     def to_json(self) -> dict:
         """
         Returns a JSON representation of the Submission object.
