@@ -3,8 +3,16 @@
 LLMAgentParticipant:
   system_message: "Welcome to the {process_name}. This is a {process_description}."
   submission_prompt: "Please generate a submission for this topic: {topic_title}\nDescription: {topic_description}"
-  invalid_json_response: "Your response did not match the given JSON schema. Please ensure that you reply with valid JSON that conforms to the given schema."
-  respond_with_json: "Your response must be in JSON format. Please respond only with valid JSON that would conform to the schema below. Make sure to respond with valid JSON, and not with another JSON schema.\n{schema}"
+  batch_submissions_prompt: "Please generate {max_subs_per_topic} submissions for this topic: {topic_title}\n\
+    Description: {topic_description}\n\
+    List your submissions in a JSON array format as described below."
+  invalid_json_response: "Your response did not match the given JSON schema. \
+    Please ensure that you reply with valid JSON that conforms to the given schema."
+  respond_with_json: "Your response must be in JSON format. \
+    Please respond only with valid JSON that would conform to the schema below. \
+    Make sure to respond with valid JSON - do not respond with another JSON schema. \
+    Do not add additional text before your JSON. Start your reply with a {{ and end with a }}.\n\
+    {schema}"
 
 ConversableAgentParticipant:
   # This can inherit from LLMAgentParticipant or have its own specific prompts
@@ -18,7 +26,9 @@ CompareVotingMethod:
   vote_prompt: "Please provide your vote for the following submissions:\n{submissions_contents}"
 
 RankingCompare:
-  vote_prompt: "Please rank the following submissions from your most preferred to least preferred:\n\n{submissions_contents}\n\nReturn the rankings as a list of submission numbers, where the first item is your top preference and the last item is your least preferred."
+  vote_prompt: "Please rank the following submissions from your most preferred to least preferred:\n\n\
+    {submissions_contents}\n\n\
+    Return the rankings as a list of submission numbers, where the first item is your top preference and the last item is your least preferred."
 
 ScoreLabel:
   vote_prompt: "Please provide your score for the following submission:\n{submission_content}\nChoose a value from: {values}"

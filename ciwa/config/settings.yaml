@@ -13,17 +13,34 @@ process:
   default_session_settings:
     max_subs_per_topic: 2 # max submissions from each participant per topic
     max_concurrent: 100 # max concurrent requests for submissions
+    batch_submissions: true # ask participants for all submissions at once rather than one at a time
     default_topic_settings:
       voting_method:
         type: "RankingCompare"
     participants:
       - type: "ConversableAgentParticipant"
         model: "gpt-3.5-turbo"
-        temperature: 2.0
+        temperature: 0.6
+        cache_seed: null
+      - type: "ConversableAgentParticipant"
+        model: "gpt-4-0125-preview"
+        temperature: 0.6
         cache_seed: null
       - type: "ConversableAgentParticipant"
         model: "claude-2.1"
-        temperature: 2.0
+        temperature: 0.6
+        cache_seed: null
+      - type: "ConversableAgentParticipant"
+        model: "claude-3-5-sonnet-20240620"
+        temperature: 0.6
+        cache_seed: null
+      - type: "ConversableAgentParticipant"
+        model: "gemini-1.0-pro"
+        temperature: 0.6
+        cache_seed: null
+      - type: "ConversableAgentParticipant"
+        model: "mistral-large-latest"
+        temperature: 0.6
         cache_seed: null
   sessions:
     - name: "Demo Session"

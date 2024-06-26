@@ -10,7 +10,7 @@ import logging
 from typing import Dict, Any, List, Callable
 from ciwa.models.identifiable import Identifiable
 from ciwa.models.voting_manager import VotingManagerFactory
-from ciwa.models.schema_factory import SchemaFactory
+import ciwa.utils.json_utils as json_utils
 
 
 class Topic(Identifiable):
@@ -106,8 +106,10 @@ class Topic(Identifiable):
             schema (Dict[str, Any]): The schema for the content of a submission.
         """
 
-        content_schema = SchemaFactory.create_object_schema("content", schema)
-        SchemaFactory.validate_schema(content_schema)
+        content_schema = json_utils.SchemaFactory.create_object_schema(
+            "content", schema
+        )
+        json_utils.validate_schema(content_schema)
         self.submission_content_schema: Dict[str, Any] = schema
 
     @staticmethod

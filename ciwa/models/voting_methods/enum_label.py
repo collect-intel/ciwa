@@ -6,7 +6,7 @@ of the LabelVotingMethod, which applies a label vote based on enumerated values.
 
 from typing import List, Dict, Any
 from ciwa.models.voting_methods.voting_method import LabelVotingMethod
-from ciwa.models.schema_factory import SchemaFactory
+from ciwa.utils.json_utils import SchemaFactory
 from ciwa.models.voting_results import VotingResults
 
 
