@@ -81,7 +81,9 @@ class Session(Identifiable):
     ) -> List["Participant"]:
 
         return [
-            ParticipantFactory.create_participant(**participant_config)
+            ParticipantFactory.create_participant(
+                process=self.process, **participant_config
+            )
             for participant_config in participants_config
         ]
 
@@ -89,7 +91,9 @@ class Session(Identifiable):
         """
         Add a participant from a config dict to the session.
         """
-        new_participant = ParticipantFactory.create_participant(**participant_config)
+        new_participant = ParticipantFactory.create_participant(
+            process=self.process, **participant_config
+        )
         self.participants.append(new_participant)
         logging.info("Added new participant: %s", new_participant.uuid)
 
@@ -111,23 +115,6 @@ class Session(Identifiable):
         )
         self.topics.append(new_topic)
         logging.info("Added new topic: %s", new_topic.title)
-
-    async def gather_submissions(self) -> None:
-        """
-        Gathers submissions from participants for each topic asynchronously.
-        """
-        tasks = []
-        semaphore = asyncio.Semaphore(self.max_concurrent)
-        for topic in self.topics:
-            for participant in self.participants:
-                for _ in range(self.max_subs_per_topic):
-                    async with semaphore:
-                        task = asyncio.create_task(
-                            self.create_submission_task(participant, topic)
-                        )
-                        tasks.append(task)
-        await asyncio.gather(*tasks)
-        logging.info("All submissions gathered.")
 
     async def create_submission_task(
         self, participant: "Participant", topic: "Topic"
@@ -185,11 +172,7 @@ class Session(Identifiable):
         """
         logging.info("Running session %s.", self.uuid)
         start_time = time.time()
-        USE_OLD_CODE = False
-        if USE_OLD_CODE:
-            await self.gather_submissions()
-        else:
-            await self._generate_submissions()
+        await self._generate_submissions()
         await self.collect_all_votes()
         await self.gather_results()
         self.conclude()

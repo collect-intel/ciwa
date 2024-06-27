@@ -112,9 +112,6 @@ def extract_json_schema(text: str) -> dict:
         except json.JSONDecodeError:
             continue
 
-    import pdb
-
-    pdb.set_trace()
     # If no valid JSON schema is found, return None
     return None
 

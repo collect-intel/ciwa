@@ -1,7 +1,12 @@
 # config/prompts.yaml
 
 LLMAgentParticipant:
-  system_message: "Welcome to the {process_name}. This is a {process_description}."
+  system_message: "You are a participant in a collective deliberation process with other participants: \"{process_name}\": \"{process_description}\"\n\
+    You will be asked to generate submissions and provide feedback on the submissions of others. \
+    Your submissions will be used to generate a collective output.\n\
+    {role_description}\n\
+    {current_session_message}"
+  current_session_message: "The current session in this process is \"{session_name}\": \"{session_description}\"\n"
   submission_prompt: "Please generate a submission for this topic: {topic_title}\nDescription: {topic_description}"
   batch_submissions_prompt: "Please generate {max_subs_per_topic} submissions for this topic: {topic_title}\n\
     Description: {topic_description}\n\
@@ -16,13 +21,14 @@ LLMAgentParticipant:
 
 ConversableAgentParticipant:
   # This can inherit from LLMAgentParticipant or have its own specific prompts
-  system_message: "You are a ConversableAgentParticipant. Welcome to the {process_name}. This is a {process_description}."
-
+  default_message: "This is simply a placeholder"
 
 LabelVotingMethod:
+  # This will be the default prompt for LabelVotingMethods unless overridden with a concrete class below.
   vote_prompt:  "Please provide your vote for the following submission:\n{submission_content}"
 
 CompareVotingMethod:
+  # This will be the default prompt for CompareVotingMethods unless overridden with a concrete class below.
   vote_prompt: "Please provide your vote for the following submissions:\n{submissions_contents}"
 
 RankingCompare:

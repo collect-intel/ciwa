@@ -8,6 +8,7 @@ from ciwa.models.participants import ParticipantFactory
 from ciwa.models.topic import TopicFactory
 from ciwa.models.session import Session
 from ciwa.tests.utils.model_utils import (
+    create_process,
     create_session,
     create_topic,
     create_participant,
@@ -23,6 +24,11 @@ class MockLabelVotingMethod(LabelVotingMethod):
         # Implement a simple mock processing logic
         results = {submission_id: 1.0 for submission_id in submission_ids}
         return results
+
+
+@pytest.fixture
+def process():
+    return create_process()
 
 
 @pytest.fixture

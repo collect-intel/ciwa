@@ -27,19 +27,28 @@ class LLMAgentParticipant(Participant):
 
     DEFAULT_MAX_RESPONSE_ATTEMPTS = 3
 
-    def __init__(self, model: str, **kwargs):
+    def __init__(self, process: "Process", model: str, **kwargs):
         """
         Initializes a new instance of LLMAgentParticipant with a unique id.
         """
-        super().__init__()
+        super().__init__(process)
         self.model = model
         self.max_response_attempts = kwargs.get(
             "max_response_attempts", self.DEFAULT_MAX_RESPONSE_ATTEMPTS
         )
+        self.role_description = kwargs.get("role_description", "")
         self.prompts = prompt_loader.get_prompts(self.__class__)
         logging.info(
             "%s initialized with model: %s", self.__class__.__name__, self.model
         )
+
+    @property
+    def system_message(self):
+        """
+        Returns a system message that tells the LLM what sort of process they are participating in
+        and their role in it.
+        """
+        return self._get_system_message()
 
     async def generate_submissions(
         self, topic: "Topic", num_submissions: int
@@ -150,12 +159,8 @@ class LLMAgentParticipant(Participant):
         )
 
         submissions = submissions_response.get("submissions", [])
-        try:
-            return [Submission(topic, self, item["content"]) for item in submissions]
-        except:
-            import pdb
 
-            pdb.set_trace()
+        return [Submission(topic, self, item["content"]) for item in submissions]
 
     async def _get_submission_response(
         self,
@@ -393,6 +398,7 @@ class LLMAgentParticipant(Participant):
             "uuid": str(self.uuid),
             "model": self.model,
             "type": f"{self.__class__.__name__}",
+            "role_description": self.role_description,
         }
 
     def __str__(self) -> str:
@@ -404,19 +410,26 @@ class LLMAgentParticipant(Participant):
         """
         return f"{self.__class__.__name__} ID: {self.uuid}"
 
-    def get_system_message(self, process_name: str, process_description: str) -> str:
+    def _get_system_message(self) -> str:
         """
-        Generates a system message based on the provided process name and description.
-
-        Args:
-            process_name (str): The name of the process.
-            process_description (str): The description of the process.
+        Generates a system message that tells the LLM what sort of process they are participating in
+        and their role in it.
 
         Returns:
             str: The formatted system message.
         """
+        current_session_message = ""
+        if self.process.current_session:
+            current_session_message = self.prompts["current_session_message"].format(
+                session_name=self.process.current_session.name,
+                session_description=self.process.current_session.description,
+            )
+
         return self.prompts["system_message"].format(
-            process_name=process_name, process_description=process_description
+            process_name=self.process.name,
+            process_description=self.process.description,
+            role_description=self.role_description,
+            current_session_message=current_session_message,
         )
 
     def get_submission_prompt(self, topic_title: str, topic_description: str) -> str:

@@ -8,10 +8,9 @@ that interacts with a ConversableAgent in the CIWA system.
 import logging
 import os
 from typing import Any, Dict, List
-import re
 import autogen
 from ciwa.models.participants.llm_agent_participant import LLMAgentParticipant
-import ciwa.utils.json_utils as json_utils
+from ciwa.utils import json_utils
 
 
 class ConversableAgentParticipant(LLMAgentParticipant):
@@ -19,7 +18,7 @@ class ConversableAgentParticipant(LLMAgentParticipant):
     Represents a participant that interacts with a ConversableAgent in the CIWA system.
     """
 
-    def __init__(self, model: str, **kwargs) -> None:
+    def __init__(self, process: "Process", model: str, **kwargs) -> None:
         """
         Initializes a new instance of ConversableAgentParticipant.
 
@@ -27,7 +26,7 @@ class ConversableAgentParticipant(LLMAgentParticipant):
             model (str): The model to use for the ConversableAgent.
             **kwargs: Additional keyword arguments.
         """
-        super().__init__(model, **kwargs)
+        super().__init__(process=process, model=model, **kwargs)
         self.agent: "ConversableAgent" = self._init_agent(**kwargs)
 
     def _init_agent(self, **kwargs) -> "ConversableAgent":
@@ -67,6 +66,7 @@ class ConversableAgentParticipant(LLMAgentParticipant):
 
         return autogen.ConversableAgent(
             name="assistant",
+            system_message=self.system_message,
             llm_config={"config_list": config_list, **agent_kwargs},
             human_input_mode="NEVER",
             code_execution_config=False,

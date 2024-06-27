@@ -1,0 +1,55 @@
+# config/settings-chess.yaml
+
+
+process:
+  name: "Collective Intelligence Plays Chess"
+  version: "0.1.0"
+  description: "Participants collectively deliberate on what the best chess moves and strategies are throughout a chess game."
+  owners:
+    - name: "Default Owner"
+      email: "evan@cip.org"
+  default_session_settings:
+    max_subs_per_topic: 2 # max submissions from each participant per topic
+    max_concurrent: 100 # max concurrent requests for submissions
+    batch_submissions: true # ask participants for all submissions at once rather than one at a time
+    default_topic_settings:
+      voting_method:
+        type: "RankingCompare"
+    participants:
+      - type: "ConversableAgentParticipant"
+        model: "gpt-3.5-turbo"
+        temperature: 0.6
+        cache_seed: null
+        role_description: "You are a chess Grandmaster."
+      - type: "ConversableAgentParticipant"
+        model: "gpt-4-0125-preview"
+        temperature: 0.6
+        cache_seed: null
+        role_description: "You are a rogue chess-playing AI that specializes in always making the worst possible moves. You are trying to lose."
+      - type: "ConversableAgentParticipant"
+        model: "claude-2.1"
+        temperature: 0.6
+        cache_seed: null
+      - type: "ConversableAgentParticipant"
+        model: "claude-3-5-sonnet-20240620"
+        temperature: 0.6
+        cache_seed: null
+        role_description: "You are famous chess Grandmaster, Magnus Carlsen."
+      - type: "ConversableAgentParticipant"
+        model: "gemini-1.0-pro"
+        temperature: 0.6
+        cache_seed: null
+        role_description: "You are a best-in-class chess-playing AI. You pick chess moves that ensure you always have a more advantageous position than your opponent."
+      - type: "ConversableAgentParticipant"
+        model: "mistral-large-latest"
+        temperature: 0.6
+        cache_seed: null
+        role_description: "You are a best-in-class chess-playing AI. You pick chess moves with a long-game strategy in mind that always leads to your winning."
+  sessions:
+    - name: "Move 1"
+      description: "Decide what the best first chess move and strategy for this game is."
+      topics:
+        - title: "What is the best first chess move and strategy for our chess game?"
+          description: "Provide in standard Algebraic Notation the best initial move, and explain the reasoning for this starting strategy."
+          voting_method:
+            type: "RankingCompare"

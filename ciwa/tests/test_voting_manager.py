@@ -6,12 +6,21 @@ from ciwa.models.topic import TopicFactory
 from ciwa.models.session import Session
 from ciwa.models.submission import Submission
 from ciwa.models.participants import ParticipantFactory
+from ciwa.models.process import Process
 
 
 @pytest.fixture
-def session():
+def process():
+    return Process(
+        name="Test Process",
+        description="A test process",
+    )
+
+
+@pytest.fixture
+def session(process):
     return Session(
-        process=None,
+        process=process,
         name="Test Session",
         description="A test session",
         topics_config=[],
@@ -33,7 +42,7 @@ def topic(session):
 @pytest.fixture
 def participant():
     participant_config = {"type": "LLMAgentParticipant", "model": "gpt-3.5-turbo"}
-    return ParticipantFactory.create_participant(**participant_config)
+    return ParticipantFactory.create_participant(process=process, **participant_config)
 
 
 @pytest.mark.asyncio

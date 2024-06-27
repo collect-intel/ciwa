@@ -17,13 +17,14 @@ class ParticipantFactory:
     """
 
     @staticmethod
-    def create_participant(type: str, **kwargs) -> "Participant":
+    def create_participant(type: str, process: "Process", **kwargs) -> "Participant":
         """
         Factory method to create a participant of the specified type.
 
         Args:
             type (str): Type of participant to create.
                         Currently supports 'LLMAgentParticipant' and 'ConversableAgentParticipant'.
+            process (Process): Process the participant is participating in.
             kwargs (Any): Additional keyword arguments necessary for initializing participants.
 
         Returns:
@@ -33,7 +34,7 @@ class ParticipantFactory:
             ValueError: If the type is not supported.
         """
         if type == "LLMAgentParticipant":
-            return LLMAgentParticipant(**kwargs)
+            return LLMAgentParticipant(process=process, **kwargs)
         elif type == "ConversableAgentParticipant":
             model = kwargs.pop("model")
             if not model:
@@ -43,7 +44,7 @@ class ParticipantFactory:
                 raise ValueError(
                     "Model must be provided for ConversableAgentParticipant."
                 )
-            return ConversableAgentParticipant(model=model, **kwargs)
+            return ConversableAgentParticipant(process=process, model=model, **kwargs)
         else:
             logging.error(f"Unsupported participant type: {type}")
             raise ValueError(f"Participant type {type} is not supported.")

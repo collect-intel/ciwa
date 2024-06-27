@@ -5,12 +5,21 @@ from ciwa.models.participants import ParticipantFactory
 from ciwa.models.session import Session
 from ciwa.models.topic import TopicFactory
 from ciwa.models.submission import Submission
+from ciwa.models.process import Process
 
 
 @pytest.fixture
-def session():
+def process():
+    return Process(
+        name="Test Process",
+        description="A test process",
+    )
+
+
+@pytest.fixture
+def session(process):
     return Session(
-        process=None,
+        process=process,
         name="Test Session",
         description="A test session",
         topics_config=[],
@@ -29,9 +38,11 @@ def topic(session):
     return TopicFactory.create_topic(session=session, **topic_config)
 
 
-def test_participant_creation():
+def test_participant_creation(process):
     participant_config = {"type": "LLMAgentParticipant", "model": "gpt-3.5-turbo"}
-    participant = ParticipantFactory.create_participant(**participant_config)
+    participant = ParticipantFactory.create_participant(
+        process=process, **participant_config
+    )
     assert participant is not None
     assert participant.model == "gpt-3.5-turbo"
 
@@ -39,7 +50,9 @@ def test_participant_creation():
 @pytest.mark.asyncio
 async def test_participant_interaction(topic):
     participant_config = {"type": "LLMAgentParticipant", "model": "gpt-3.5-turbo"}
-    participant = ParticipantFactory.create_participant(**participant_config)
+    participant = ParticipantFactory.create_participant(
+        process=topic.session.process, **participant_config
+    )
     submission_content = "This is a test submission."
     submission = Submission(
         topic=topic, participant=participant, content=submission_content

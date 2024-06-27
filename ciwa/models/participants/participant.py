@@ -14,12 +14,13 @@ class Participant(Identifiable, ABC):
     and generate submissions.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, process: "Process") -> None:
         """
         Initializes a new Participant instance with a unique identifier.
         """
         super().__init__()
         self.type = f"{self.__class__.__name__}"
+        self.process = process
 
     @abstractmethod
     async def generate_submissions(
