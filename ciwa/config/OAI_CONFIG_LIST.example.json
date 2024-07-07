@@ -33,6 +33,7 @@
     {
         "model": "mistral-large-latest",
         "api_key": "{YOUR_MISTRAL_API_KEY}",
-        "api_type": "mistral"
+        "api_type": "mistral",
+        "response_format": {"type": "json_object"},
     }
 ]

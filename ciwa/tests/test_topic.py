@@ -65,6 +65,7 @@ async def test_add_submission(session, topic_config, participant):
 
 @pytest.mark.asyncio
 async def test_add_invalid_submission(session, topic_config, participant):
+    # Topic adds submissions even if they don't pass validator.
     topic_config["submission_validator"] = MagicMock(return_value=False)
     topic_config["submission_invalid_message"] = "Invalid submission."
 
@@ -76,7 +77,7 @@ async def test_add_invalid_submission(session, topic_config, participant):
     )
 
     await topic.add_submission(submission)
-    assert len(topic.submissions) == 0
+    assert len(topic.submissions) == 1
 
 
 def test_voting_manager_initialization(session, topic_config):

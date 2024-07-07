@@ -59,39 +59,33 @@ class Topic(Identifiable):
 
     async def add_submission(self, submission: "Submission") -> None:
         """
-        Asynchronously adds a submission to the topic's queue of submissions if
-        it passes the validation.
+        Asynchronously adds a submission to the topic's queue of submissions.
 
         Args:
             submission (Submission): The submission to add to the topic.
         """
-        if self.submission_validator(submission):
-            await self.submissions_queue.put(submission)
-            self.submissions.append(submission)
-            self.voting_manager.add_submission(submission)
-            logging.info("Submission %s added to Topic %s", submission.uuid, self.title)
-        else:
-            logging.warning(
-                "Submission %s is invalid for Topic %s: %s",
-                submission.uuid,
-                self.title,
-                self.submission_invalid_message,
-            )
+        # confirm submission is type "Submission" class
+        assert submission.__class__.__name__ == "Submission"
+
+        await self.submissions_queue.put(submission)
+        self.submissions.append(submission)
+        self.voting_manager.add_submission(submission)
+        logging.info("Submission %s added to Topic %s", submission.uuid, self.title)
 
     def set_submission_validator(
         self,
-        submission_validator: Callable[[Any], bool] = None,
+        submission_validator: Callable[[dict], bool] = None,
         submission_invalid_message: str = None,
     ) -> None:
         """
         Sets the submission validation function for this topic.
 
         Args:
-            submission_validator (Callable[[Any], bool]): The function to validate submissions.
+            submission_validator (Callable[[Any], bool]): The function to validate submission json.
             submission_invalid_message (str): The message to return to a Participant when
             a submission is invalid.
         """
-        self.submission_validator: Callable[[Any], bool] = submission_validator or (
+        self.submission_validator: Callable[[dict], bool] = submission_validator or (
             lambda x: True
         )
         self.submission_invalid_message: str = (

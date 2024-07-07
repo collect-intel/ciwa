@@ -3,7 +3,6 @@
 
 process:
   name: "Collective Intelligence Plays Chess"
-  version: "0.1.0"
   description: "Participants collectively deliberate on what the best chess moves and strategies are throughout a chess game."
   owners:
     - name: "Default Owner"
