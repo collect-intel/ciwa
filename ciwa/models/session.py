@@ -27,7 +27,7 @@ class Session(Identifiable):
         topics (List[Topic]): The topics in the session.
         participants (List[Participant]): The participants in the session.
         max_concurrent (int): Maximum concurrent tasks.
-        max_subs_per_topic (int): Maximum submissions per topic.
+        submissions_per_participant_per_topic (int): Maximum submissions per topic.
         results (Dict[str, Any]): The results of the session.
         do_save_results (bool): Indicates if results should be saved.
     """
@@ -38,7 +38,7 @@ class Session(Identifiable):
         topics_config: Optional[List[Dict[str, Any]]] = None,
         default_topic_settings: Optional[Dict[str, Any]] = None,
         participants_config: Optional[List[Dict[str, Any]]] = None,
-        max_subs_per_topic: int = 1,
+        submissions_per_participant_per_topic: int = 1,
         max_concurrent: int = 50,
         save_results: bool = True,
         batch_submissions: bool = False,
@@ -56,7 +56,9 @@ class Session(Identifiable):
             participants_config or []
         )
         self.max_concurrent: int = max_concurrent
-        self.max_subs_per_topic: int = max_subs_per_topic
+        self.submissions_per_participant_per_topic: int = (
+            submissions_per_participant_per_topic
+        )
         self.results: Dict[str, Any] = {}
         self.do_save_results: bool = save_results
         self.do_batch_submissions = batch_submissions
@@ -144,7 +146,7 @@ class Session(Identifiable):
                 if self.do_batch_submissions:
                     tasks.append(self._generate_batch_submissions(topic, participant))
                 else:
-                    for _ in range(self.max_subs_per_topic):
+                    for _ in range(self.submissions_per_participant_per_topic):
                         tasks.append(
                             self._generate_single_submission(topic, participant)
                         )
@@ -161,7 +163,7 @@ class Session(Identifiable):
         self, topic: "Topic", participant: "Participant"
     ) -> None:
         submissions = await participant.create_batch_submissions(
-            topic, self.max_subs_per_topic
+            topic, self.submissions_per_participant_per_topic
         )
         for submission in submissions:
             await topic.add_submission(submission)

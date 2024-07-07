@@ -160,7 +160,7 @@ config_dict = {
         "name": "Collective Intelligence Plays Chess",
         "description": "Participants collectively deliberate on what the best chess moves and strategies are throughout a chess game.",
         "default_session_settings": {
-            "max_subs_per_topic": 1,
+            "submissions_per_participant_per_topic": 1,
             "max_concurrent": 100,
             "batch_submissions": True,
         },

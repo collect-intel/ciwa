@@ -8,7 +8,7 @@ LLMAgentParticipant:
     {current_session_message}"
   current_session_message: "The current session in this process is \"{session_name}\": \"{session_description}\"\n"
   submission_prompt: "Please generate a submission for this topic: {topic_title}\nDescription: {topic_description}"
-  batch_submissions_prompt: "Please generate {max_subs_per_topic} submissions for this topic: {topic_title}\n\
+  batch_submissions_prompt: "Please generate {submissions_per_participant_per_topic} submissions for this topic: {topic_title}\n\
     Description: {topic_description}\n\
     List your submissions in a JSON array format as described below."
   invalid_json_response: "Your response did not match the given JSON schema. \

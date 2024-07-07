@@ -11,7 +11,7 @@ process:
     - name: "Default Owner"
       email: "evan@cip.org"
   default_session_settings:
-    max_subs_per_topic: 2 # max submissions from each participant per topic
+    submissions_per_participant_per_topic: 2 # max submissions from each participant per topic
     max_concurrent: 100 # max concurrent requests for submissions
     batch_submissions: true # ask participants for all submissions at once rather than one at a time
     default_topic_settings:
