@@ -6,6 +6,7 @@ on a particular topic.
 """
 
 import datetime
+from typing import Any
 from ciwa.models.identifiable import Identifiable
 
 
@@ -24,15 +25,15 @@ class Submission(Identifiable):
         self, topic: "Topic", participant: "Participant", content: str
     ) -> None:
         super().__init__()
-        self.topic = topic
-        self.participant = participant
-        self.content = content
+        self.topic: "Topic" = topic
+        self.participant: "Participant" = participant
+        self.content: Any = content
         self.created_at = datetime.datetime.now()
 
     def __str__(self) -> str:
         return (
-            f"Submission {self.uuid} by {self.participant.identifier} on "
-            f"'{self.topic.title}' at {self.created_at}: {self.content[:50]}..."
+            f"Submission {self.uuid} by {self.participant.uuid} on "
+            f"'{self.topic.title}' at {self.created_at}: {self.content[:50] if self.content else ""}..."
         )
 
     @staticmethod
@@ -72,6 +73,7 @@ class Submission(Identifiable):
         return {
             "uuid": self.uuid,
             "participant_uuid": self.participant.uuid,
+            # TODO: modify content to_json to be adaptive to whether content is a str or more nested json
             "content": self.content,
             "created_at": self.created_at.isoformat(),
         }
